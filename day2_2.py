@@ -4,12 +4,8 @@ def solve(input):
         values = [int(value) for value in row.split('\t')]
         for i in values:
             for j in values:
-                if i == j:
-                    continue
-                elif i % j == 0:
+                if i != j and i % j == 0:
                     sum += i // j
-                elif j % i == 0:
-                    sum += j // i
     return sum
 
 
