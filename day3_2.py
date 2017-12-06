@@ -29,11 +29,8 @@ from math import sqrt, ceil
 def solve(input):
     spiral = [1]
 
-    #while head < input:
-    for i in range(1, 5):
-        # Start with the previous value.
+    while spiral[-1] < input:
         x, y = spiral_coords(len(spiral)+1)
-        print('at', len(spiral), x, y)
 
         neighbours = [
             (x-1, y-1),
@@ -41,6 +38,8 @@ def solve(input):
             (x-1, y+1),
             (x,   y-1),
             (x,   y+1),
+            (x+1, y-1),
+            (x+1, y),
             (x+1, y+1),
         ]
 
@@ -48,12 +47,11 @@ def solve(input):
         for nx, ny in neighbours:
             pos = spiral_pos(nx, ny) - 1
             if pos < len(spiral):
-                print(len(spiral), nx, ny, ' += ', spiral[pos])
                 value += spiral[pos]
 
         spiral.append(value)
 
-    print(spiral)
+    print(spiral[-1])
 
 
 def spiral_coords(pos):
