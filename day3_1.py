@@ -37,21 +37,24 @@ def solve(input):
     start = 1 + (size-1)*(size-1)
     diff = input - start
     r = size // 2
-    x = y = r
     if size % 2 == 0:
         if diff < size:
             # right
+            x = r
             y = diff - (r-1)
         else:
             # top
             x = (r-1) - (diff - size)
+            y = r
     else:
         if diff < size:
             # left
+            x = -r
             y = r - diff
         else:
             # bottom
             x = (diff - size) - (r-1)
+            y = r
 
     return abs(x) + abs(y)
 

@@ -21,32 +21,89 @@
 # 330   10    1    1   54
 # 351   11   23   25   26
 # 362  747  806--->   ...
+#
 # What is the first value written that is larger than your puzzle input?
 from math import sqrt, ceil
 
 
 def solve(input):
-    size = ceil(sqrt(input))
+    spiral = [1]
+
+    #while head < input:
+    for i in range(1, 5):
+        # Start with the previous value.
+        x, y = spiral_coords(len(spiral)+1)
+        print('at', len(spiral), x, y)
+
+        neighbours = [
+            (x-1, y-1),
+            (x-1, y),
+            (x-1, y+1),
+            (x,   y-1),
+            (x,   y+1),
+            (x+1, y+1),
+        ]
+
+        value = 0
+        for nx, ny in neighbours:
+            pos = spiral_pos(nx, ny) - 1
+            if pos < len(spiral):
+                print(len(spiral), nx, ny, ' += ', spiral[pos])
+                value += spiral[pos]
+
+        spiral.append(value)
+
+    print(spiral)
+
+
+def spiral_coords(pos):
+    size = ceil(sqrt(pos))
     start = 1 + (size-1)*(size-1)
-    diff = input - start
+    diff = pos - start
     r = size // 2
-    x = y = r
     if size % 2 == 0:
         if diff < size:
             # right
+            x = r
             y = diff - (r-1)
         else:
             # top
             x = (r-1) - (diff - size)
+            y = r
     else:
         if diff < size:
             # left
+            x = -r
             y = r - diff
         else:
             # bottom
             x = (diff - size) - (r-1)
+            y = -r
 
-    return abs(x) + abs(y)
+    return x, y
+
+
+def spiral_pos(x, y):
+    r = max(abs(x), abs(y))
+    size = 1 + r*2
+    start = (size-1)*(size-1) - (size-2)*2
+    end = size*size
+
+    if x == r:
+        if y == -r:
+            return end
+        else:
+            # right
+            return start + (r-1) + y
+    elif x == -r:
+        # left
+        return start + (size-2)*2+1 + r - y
+    elif y == r:
+        # top
+        return start + (size-1) + (r-1) - x
+    elif y == -r:
+        # bottom
+        return end + x - r
 
 
 print(solve(361527))
