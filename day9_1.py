@@ -68,7 +68,6 @@ class Stream(object):
     def next(self):
         res = self.peek()
         if res is not None:
-            print('next: ', res)
             self.pos += 1
         return res
 
@@ -88,11 +87,11 @@ def parse_group(stream):
         if stream.peek() is None:
             raise ValueError('unterminated group')
         res.append(parse_element(stream))
-        print('element parsed', stream.peek())
         if not stream.accept(','):
+            if not stream.accept('}'):
+                raise ValueError("expected end of group '}'")
             break
 
-    print('group parsed', stream.peek())
     return res
 
 
@@ -121,17 +120,26 @@ def parse_garbage(stream):
             res += '!' + stream.next()
         else:
             res += stream.next()
-    print('garbage parsed')
+
     return res + '>'
+
+
+def parse(input):
+    stream = Stream(input)
+    result = parse_group(stream)
+    if not stream.peek() is None:
+        raise ValueError('not at end of stream')
+    return result
+
+
+def score(group, depth=1):
+    return depth + sum([score(sub, depth+1) for sub in group if type(sub) is list])
 
 
 def main():
     with open('day9_1.input.txt') as f:
-        stream = Stream(f.read())
-        print(parse_group(stream))
-        print(stream.input[stream.pos:])
-        if not stream.peek() is None:
-            raise ValueError('not at end of stream')
+        group = parse(f.read())
+        print(score(group))
 
 
 if __name__ == '__main__':
