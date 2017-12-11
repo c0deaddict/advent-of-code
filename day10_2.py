@@ -49,16 +49,28 @@
 # Treating your puzzle input as a string of ASCII characters, what is the Knot Hash of your puzzle input? Ignore any
 # leading or trailing whitespace you might encounter.
 #
+from collections import namedtuple
+
+Knot = namedtuple('Knot', 'pos skip lst')
 
 
-def knot_hash(input):
-    lst = list(range(0, 256))
-    pos = 0
-    skip = 0
+def process_input(input):
+    return [ord(c) for c in input] + [17, 31, 73, 47, 23]
+
+
+def knot_init():
+    return Knot(pos=0, skip=0, lst=list(range(0, 256)))
+
+
+def knot_update(k, input):
+    pos = k.pos
+    skip = k.skip
+    lst = k.lst
 
     for l in input:
         # Select a portion of the list and reverse it.
-        selection = list(reversed([lst[i % len(lst)] for i in range(pos, pos+l)]))
+        selection = list(reversed([lst[i % len(lst)]
+                                   for i in range(pos, pos+l)]))
 
         # Write back to the reversed selection into lst.
         for i in range(pos, pos+l):
@@ -67,12 +79,31 @@ def knot_hash(input):
         pos = (pos + l + skip) % len(lst)
         skip += 1
 
-    return lst[0] * lst[1]
+    return Knot(pos=pos, skip=skip, lst=lst)
+
+
+def dense_hash(k):
+    res = []
+    for i in range(0, 16):
+        val = 0
+        for j in range(0, 16):
+            val ^= k.lst[i * 16 + j]
+        res.append(val)
+    return res
+
+
+def to_hex(dense_hash):
+    return ''.join(map(lambda v: '%02x' % v, dense_hash))
 
 
 def main():
-    input = '189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62'
-    print(knot_hash([int(l) for l in input.split(',')]))
+    input = process_input('189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62')
+
+    k = knot_init()
+    for i in range(0, 64):
+        k = knot_update(k, input)
+
+    print(to_hex(dense_hash(k)))
 
 
 if __name__ == '__main__':
