@@ -71,7 +71,7 @@ def parse_line(line):
 
 
 def main():
-    with open('day12_1.input.txt') as f:
+    with open('day12.input.txt') as f:
         edges = dict([parse_line(line) for line in f.readlines()])
         print(len(find_connected(0, edges, set())))
 
