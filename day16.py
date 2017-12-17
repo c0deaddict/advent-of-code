@@ -45,32 +45,99 @@ STEP = 's'
 EXCHANGE = 'x'
 PARTNER = 'p'
 
+COUNT = 16
+
 
 def init():
-    return [chr(i + ord('a')) for i in range(0, 16)]
+    return [chr(i + ord('a')) for i in range(0, COUNT)]
 
 
-def swap(programs, i, j):
-    tmp = programs[i]
-    programs[i] = programs[j]
-    programs[j] = tmp
-
-
-def step(programs, move):
+def interpret_move(spin, programs, move):
     if move[0] == STEP:
-        num = move[1]
-        idx = len(programs) - num
-        section = programs[idx:]
-        del programs[idx:]
-        for p in reversed(section):
-            programs.insert(0, p)
-
+        return (spin + move[1]) % COUNT
     elif move[0] == EXCHANGE:
-        swap(programs, move[1], move[2])
+        i = (move[1] - spin) % COUNT
+        j = (move[2] - spin) % COUNT
+        tmp = programs[i]
+        programs[i] = programs[j]
+        programs[j] = tmp
+        return spin
     elif move[0] == PARTNER:
         i = programs.index(move[1])
         j = programs.index(move[2])
-        swap(programs, i, j)
+        programs[i] = move[2]
+        programs[j] = move[1]
+        return spin
+
+
+def compile_move(move):
+    if move[0] == STEP:
+        params = dict(spin=move[1], count=COUNT)
+        yield '# s{spin}'.format(**params)
+        yield 'spin = (spin + {spin}) % {count}'.format(**params)
+    elif move[0] == EXCHANGE:
+        params = dict(i=move[1], j=move[2], count=COUNT)
+        yield '# e{i}/{j}'.format(**params)
+        yield 'i = ({i} - spin) % {count}'.format(**params)
+        yield 'j = ({j} - spin) % {count}'.format(**params)
+        yield 'tmp = programs[i]'
+        yield 'programs[i] = programs[j]'
+        yield 'programs[j] = tmp'
+    elif move[0] == PARTNER:
+        params = dict(a=move[1], b=move[2])
+        yield '# p{a}/{b}'.format(**params)
+        yield "i = programs.index('{a}')".format(**params)
+        yield "j = programs.index('{b}')".format(**params)
+        yield "programs[i] = '{b}'".format(**params)
+        yield "programs[j] = '{a}'".format(**params)
+
+
+def compile_program(moves):
+    yield 'def compiled_dance(spin, programs):'
+    for move in moves:
+        yield from ['    ' + line for line in compile_move(move)]
+    yield '    return spin'
+    yield ''
+
+
+def compile_move_c(move):
+    if move[0] == STEP:
+        return '''// s{spin}
+spin = (spin + {spin}) % {count};
+'''.format(spin=move[1], count=COUNT)
+    elif move[0] == EXCHANGE:
+        return '''//# e{i}/{j}
+i = mod(({i} - spin), {count});
+j = mod(({j} - spin), {count});
+tmp = programs[i];
+programs[i] = programs[j];
+programs[j] = tmp;
+'''.format(i=move[1], j=move[2], count=COUNT)
+    elif move[0] == PARTNER:
+        return '''// p{a}/{b}
+for (int k = 0; k < {count}; k++) {{
+    if (programs[k] == '{a}') i = k;
+    if (programs[k] == '{b}') j = k;
+}}
+programs[i] = '{b}';
+programs[j] = '{a}';
+'''.format(a=move[1], b=move[2], count=COUNT)
+
+
+def compile_program_c(moves):
+    yield 'inline int mod(int a, int b) {'
+    yield 'int ret = a % b;'
+    yield 'if (ret < 0) ret += b;'
+    yield 'return ret;'
+    yield '}'
+    yield ''
+    yield 'int compiled_dance(int spin, char *programs) {'
+    yield 'char tmp;'
+    yield 'int i, j;'
+    for move in moves:
+        yield compile_move_c(move)
+    yield 'return spin;'
+    yield '}'
 
 
 def parse_move(str):
@@ -85,20 +152,36 @@ def parse_move(str):
         return PARTNER, a, b
 
 
-def dance(programs, moves):
+def dance(spin, programs, moves):
     for move in moves:
-        step(programs, move)
+        spin = interpret_move(spin, programs, move)
+    return spin
+
+
+def final_spin(spin, programs):
+    return programs[-spin:] + programs[:-spin]
 
 
 def main():
     with open('day16.input.txt') as f:
         moves = [parse_move(str) for str in f.read().split(',')]
 
+    spin = 0
     programs = init()
-    for i in range(0, 1000):
-        dance(programs, moves)
+    program = '\n'.join(compile_program(moves))
 
-    print(''.join(programs))
+    with open('day16_dance.c', 'w') as f:
+        c_program = '\n'.join(compile_program_c(moves))
+        f.write(c_program)
+
+    exports = dict()
+    exec(program, exports)
+    compiled_dance = exports['compiled_dance']
+    for i in range(0, 1000):
+        spin = compiled_dance(spin, programs)
+
+    spin = spin % COUNT
+    print(''.join(final_spin(spin, programs)))
 
 
 if __name__ == '__main__':
