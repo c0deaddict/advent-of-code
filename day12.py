@@ -53,16 +53,27 @@
 #
 
 
-def find_connected(v, edges, visited):
-    if v in visited:
-        return
-    else:
-        visited.add(v)
+def find_connected(start, edges):
+    visited = set()
+    queue = [start]
 
-    for n in edges[v]:
-        find_connected(n, edges, visited)
+    for v in queue:
+        if v not in visited:
+            visited.add(v)
+            for n in edges[v]:
+                queue.append(n)
 
     return visited
+
+
+def count_groups(edges):
+    vertices = set(edges.keys())
+    groups = 0
+    while len(vertices):
+        start = next(iter(vertices))
+        vertices = vertices - find_connected(start, edges)
+        groups += 1
+    return groups
 
 
 def parse_line(line):
@@ -73,15 +84,8 @@ def parse_line(line):
 def main():
     with open('day12.input.txt') as f:
         edges = dict([parse_line(line) for line in f.readlines()])
-        print(len(find_connected(0, edges, set())))
-
-        vertices = set(edges.keys())
-        groups = 0
-        while len(vertices):
-            start = next(iter(vertices))
-            vertices = vertices - find_connected(start, edges, set())
-            groups += 1
-        print(groups)
+        print(len(find_connected(0, edges)))
+        print(count_groups(edges))
 
 
 if __name__ == '__main__':

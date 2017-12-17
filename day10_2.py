@@ -96,14 +96,18 @@ def to_hex(dense_hash):
     return ''.join(map(lambda v: '%02x' % v, dense_hash))
 
 
-def main():
-    input = process_input('189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62')
-
+def knot_hash(str):
+    input = process_input(str)
     k = knot_init()
     for i in range(0, 64):
         k = knot_update(k, input)
 
-    print(to_hex(dense_hash(k)))
+    return dense_hash(k)
+
+
+def main():
+    input = '189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62'
+    print(to_hex(knot_hash(input)))
 
 
 if __name__ == '__main__':
