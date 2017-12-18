@@ -38,9 +38,6 @@
 #
 # In what order are the programs standing after their billion dances?
 
-
-import time
-
 STEP = 's'
 EXCHANGE = 'x'
 PARTNER = 'p'
@@ -125,7 +122,7 @@ programs[j] = '{a}';
 
 
 def compile_program_c(moves):
-    yield 'inline int mod(int a, int b) {'
+    yield 'static inline int mod(int a, int b) {'
     yield 'int ret = a % b;'
     yield 'if (ret < 0) ret += b;'
     yield 'return ret;'
@@ -166,8 +163,6 @@ def main():
     with open('day16.input.txt') as f:
         moves = [parse_move(str) for str in f.read().split(',')]
 
-    spin = 0
-    programs = init()
     program = '\n'.join(compile_program(moves))
 
     with open('day16_dance.c', 'w') as f:
@@ -177,14 +172,27 @@ def main():
     exports = dict()
     exec(program, exports)
     compiled_dance = exports['compiled_dance']
-    for i in range(0, 1000):
+
+    # Find the cycle time.
+    history = list()
+    cycles = 0
+    spin = 0
+    programs = init()
+    while True:
+        spin = compiled_dance(spin, programs)
+        current = ''.join(final_spin(spin, programs))
+        if current in history:
+            break
+        history.append(current)
+        cycles += 1
+
+    cycle_time = cycles - history.index(current)
+    rem = (1000000000 - (cycles + 1)) % cycle_time
+    for i in range(0, rem):
         spin = compiled_dance(spin, programs)
 
-    spin = spin % COUNT
     print(''.join(final_spin(spin, programs)))
 
 
 if __name__ == '__main__':
-    t = time.time()
     main()
-    print(time.time() - t)
