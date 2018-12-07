@@ -20,7 +20,7 @@
          y (second polymer)
          ys (rest (rest polymer))]
     (if (nil? x)
-      nil
+      result
       (if (nil? y)
         (conj result x)
         (if (reactive? x y)
@@ -38,8 +38,23 @@
         compacted
         (recur new-len (compact compacted))))))
 
+(defn remove-unit [polymer unit]
+  (filter #(not= (str/lower-case %) (str/lower-case unit))
+          polymer))
+
+;; part 2
+;; https://clojure.org/guides/threading_macros
+(defn shortest-polymer [polymer]
+  (->>
+   (set (map str/lower-case polymer))
+   (pmap #(remove-unit polymer %))
+   (pmap (comp count full-compact))
+   sort
+   first))
+
 (defn main
   "Advent of Code 2018 - Day 5"
   [& args]
   (let [polymer (read-data)]
-    (println (count (full-compact polymer)))))
+    (println (count (full-compact polymer))
+             (shortest-polymer polymer))))
