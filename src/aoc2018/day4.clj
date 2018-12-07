@@ -83,8 +83,11 @@
   [f m]
   (into {} (map (fn [[k v]] [k (f v)]) m)))
 
+(defn group-minutes [minutes]
+  (sort-by second (map-values count (group-by identity (apply concat minutes)))))
+
 (defn find-sleepiest-minute [minutes]
-  (first (last (sort-by second (map-values count (group-by identity (apply concat minutes)))))))
+  (first (last (group-minutes minutes))))
 
 
 ;; Strategy 1: Find the guard that has the most minutes asleep.
@@ -95,9 +98,19 @@
     (* (key g) m)))
 
 
-;; Strategy 2: Of all guards, which guard is most frequently asleep on the same minute?
+;; Strategy 2: Of all guards, which guard is most frequently asleep on
+;; the same minute?
 (defn strategy-2 [periods]
-  nil)
+  "Returns [guard-id [sleepiest-minute frequency]]"
+  ;; aggregate sleeping minutes and take the most frequent one (last).
+  (let [sleepiest-minutes (map-values
+                           (comp last group-minutes sleep-minutes)
+                           periods)
+        [guard [minute frequency]]
+        (last (sort-by #(second (second %))
+                       ;; filter out guards that haven't slept (nil).
+                       (filter second sleepiest-minutes)))]
+    (* guard minute)))
 
 (defn main
   "Advent of Code 2018 - Day 4"
