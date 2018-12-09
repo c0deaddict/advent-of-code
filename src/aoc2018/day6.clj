@@ -33,6 +33,15 @@
     [[x-min y-min]
      [(+ 1 x-max) (+ 1 y-max)]]))
 
+(defn expand-bounds [d [[x-min y-min] [x-max y-max]]]
+  [[(- x-min d) (- y-min d)]
+   [(+ x-max d) (+ y-max d)]])
+
+(defn enumerate-fields [[[x-min y-min] [x-max y-max]]]
+  (for [x (range x-min x-max)
+        y (range y-min y-max)]
+    [x y]))
+
 (defn manhattan-distance [[x1 y1] [x2 y2]]
   (+ (Math/abs (- x2 x1))
      (Math/abs (- y2 y1))))
@@ -51,16 +60,13 @@
   (into {} (map (fn [[k v]] [k (f v)]) m)))
 
 (defn count-closest [coords]
-  (let [[[x-min y-min] [x-max y-max]] (bounds coords)]
-    (->>
-     (for [x (range x-min x-max)
-           y (range y-min y-max)]
-       [x y])
-     (pmap #(find-closest coords %))
-     (filter identity)
-     (group-by identity)
-     (map-values count)
-     (sort-by second))))
+  (->>
+   (enumerate-fields (bounds coords))
+   (pmap #(find-closest coords %))
+   (filter identity)
+   (group-by identity)
+   (map-values count)
+   (sort-by second)))
 
 ;; everything that is closest to the bounds is infinite.
 (defn find-infinites [coords]
@@ -79,6 +85,19 @@
      (filter identity)
      set)))
 
+(defn sum-distances [coords pt]
+  (reduce + (map #(manhattan-distance pt %) coords)))
+
+(defn size-of-safe-region [coords limit]
+  (let [n (count coords)
+        d (int (Math/ceil (/ limit n)))]
+    (->>
+     (expand-bounds d (bounds coords))
+     enumerate-fields
+     (pmap #(sum-distances coords %))
+     (filter #(< % limit))
+     count)))
+
 (defn main
   "Advent of Code 2018 - Day 6"
   [& args]
@@ -86,4 +105,5 @@
         closest (count-closest coords)
         infinites (find-infinites coords)
         not-in-infinites #(not (contains? infinites (first %)))]
-    (println (second (last (filter not-in-infinites closest))))))
+    (println (second (last (filter not-in-infinites closest)))
+             (size-of-safe-region coords 10000))))
