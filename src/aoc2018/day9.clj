@@ -5,6 +5,40 @@
            [clojure.pprint :refer [pprint]]
            [clojure.test :as t]))
 
+(definterface INode
+  (getPrev [])
+  (setPrev [v])
+  (getNext [])
+  (setNext [v]))
+
+(deftype Node [data
+               ^{:volatile-mutable true} prev
+               ^{:volatile-mutable true} next]
+  INode
+  (getPrev [_] prev)
+  (setPrev [this v] (set! prev v))
+  (getNext [_] next)
+  (setNext [this v] (set! next v)))
+
+(defn new-circle []
+  (let [head (Node. nil nil 0)]
+    (.setPrev head head)
+    (.setNext head head)
+    head))
+
+(defn move-left [head n]
+  (nth (iterate #(.getPrev %) head)) n)
+
+(defn move-right [head n]
+  (nth (iterate #(.getNext %) head)) n)
+
+(defn insert-node [head data]
+  (let [next (.getNext head)
+        node (Node. data head next)]
+    (.setNext head node)
+    (.setPrev next node)
+    node))
+
 ;; https://stackoverflow.com/a/24553906/248948
 (defn drop-nth [n coll]
   (keep-indexed #(if (not= %1 n) %2) coll))
