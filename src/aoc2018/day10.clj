@@ -103,6 +103,7 @@ position=<-3,  6> velocity=< 2, -1>")
 
 (defn solve-part-1 [init-state]
   (let [t (find-smallest-area init-state)]
+    (println t)
     (->
      (at-time init-state t)
      (make-picture)
