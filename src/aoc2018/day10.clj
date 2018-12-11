@@ -67,6 +67,12 @@ position=<-3,  6> velocity=< 2, -1>")
     [[x-min y-min]
      [(+ 1 x-max) (+ 1 y-max)]]))
 
+(defn dim [[[x-min y-min] [x-max y-max]]]
+  [(- x-max x-min) (- y-max y-min)])
+
+(defn area [[width height]]
+  (* width height))
+
 (defn gcd [a b]
   (if (zero? b)
     a
@@ -83,7 +89,28 @@ position=<-3,  6> velocity=< 2, -1>")
         to-row #(apply str (map to-char %))]
     (str/join "\n" (map to-row picture))))
 
+(defn compare-zip-with-index [coll]
+  (map vector (range) coll (rest coll)))
+
+(defn find-smallest-area [init-state]
+  (let [pictures (map #(at-time init-state %) (range))
+        lazy-area (map (comp area dim bounds) pictures)]
+    (->>
+     (compare-zip-with-index lazy-area)
+     (drop-while (fn [[_ a b]] (> a b)))
+     (first)
+     (first))))
+
+(defn solve-part-1 [init-state]
+  (let [t (find-smallest-area init-state)]
+    (->
+     (at-time init-state t)
+     (make-picture)
+     (render)
+     (print))))
+
 (defn main
   "Advent of Code 2018 - Day 10"
   [& args]
-  (println nil))
+  (let [init-state (parse (read-data))]
+    (solve-part-1 init-state)))
