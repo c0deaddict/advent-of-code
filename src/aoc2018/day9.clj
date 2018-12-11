@@ -21,16 +21,16 @@
   (setNext [this v] (set! next v)))
 
 (defn new-circle []
-  (let [head (Node. nil nil 0)]
+  (let [head (Node. 0 nil nil)]
     (.setPrev head head)
     (.setNext head head)
     head))
 
 (defn move-left [head n]
-  (nth (iterate #(.getPrev %) head)) n)
+  (nth (iterate #(.getPrev %) head) n))
 
 (defn move-right [head n]
-  (nth (iterate #(.getNext %) head)) n)
+  (nth (iterate #(.getNext %) head) n))
 
 (defn insert-node [head data]
   (let [next (.getNext head)
@@ -39,44 +39,43 @@
     (.setPrev next node)
     node))
 
-;; https://stackoverflow.com/a/24553906/248948
-(defn drop-nth [n coll]
-  (keep-indexed #(if (not= %1 n) %2) coll))
+(defn remove-current [head]
+  (let [next (.getNext head)
+        prev (.getPrev head)]
+    (.setNext prev next)
+    (.setPrev next prev)
+    [next (.-data head)]))
 
-;; https://stackoverflow.com/a/26442057/248948
-(defn insert-at [coll idx val]
-  (let [[before after] (split-at idx coll)]
-    (vec (concat before [val] after))))
+(defn circle-seq [head]
+  (loop [result [(.-data head)]
+         node (.getNext head)]
+    (if (= node head)
+      result
+      (recur (conj result (.-data node))
+             (.getNext node)))))
 
-(defn clockwise [circle current shift]
-  (mod (+ current shift) (count circle)))
-
-(defn do-move [circle current marble]
+(defn do-move [circle marble]
   (if (zero? (mod marble 23))
     ;; multiple of 23
-    (let [extract (clockwise circle current -7)
-          points (nth circle extract)
-          circle (into [] (drop-nth extract circle))
-          current (clockwise circle extract 0)]
-      [circle current (+ marble points)])
+    (let [circle (move-left circle 7)
+          [circle points] (remove-current circle)]
+      [circle (+ marble points)])
     ;; normal flow
-    (let [current (clockwise circle current 2)
-          circle (insert-at circle current marble)]
-      [circle current 0])))
+    (let [circle (move-right circle 1)
+          circle (insert-node circle marble)]
+      [circle 0])))
 
 (defn run-game [num-players num-marbles]
-  (loop [circle [0]
-         current 0
+  (loop [circle (new-circle)
          marble 1
          scores (zipmap (range num-players) (repeat 0))
          turns (cycle (range num-players))]
     (if (> marble num-marbles)
       scores
       (let [player (first turns)
-            [circle current points] (do-move circle current marble)]
-        ;; (println player circle current)
+            [circle points] (do-move circle marble)]
+        ;; (println player (circle-seq circle))
         (recur circle
-               current
                (inc marble)
                (update scores player #(+ % points))
                (rest turns))))))
@@ -95,4 +94,5 @@
 (defn main
   "Advent of Code 2018 - Day 9"
   [& args]
-  (println (high-score (run-game 429 70901))))
+  (println (high-score (run-game 429 70901))
+           (high-score (run-game 429 (* 100 70901)))))
