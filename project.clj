@@ -7,4 +7,5 @@
                  [clojure.java-time "0.3.2"]]
   :main ^:skip-aot aoc2018.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}}
+  :jvm-opts ["-Xmx8G"])
