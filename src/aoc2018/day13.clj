@@ -17,6 +17,16 @@
 \-+-/  \-+--/
   \------/   "))
 
+(def test-data-2
+  (str
+#"/>-<\  
+|   |  
+| /<+-\
+| | | v
+\>+</ |
+  |   ^
+  \<->/"))
+
 (def char-mapping
   {\- :track-horz
    \| :track-vert
@@ -71,11 +81,12 @@
     (doseq [y (range height)]
       (doseq [x (range width)
               :let [cell (aget grid y x)
-                    trains (get trains-at [x y])]]
+                    trains (get trains-at [x y])
+                    active (filter (comp not :collided) trains)]]
         (print
          (cond
            (empty? trains) (inv-char-mapping cell)
-           (= 1 (count trains)) (inv-char-mapping (:dir (first trains)))
+           (not (empty? active)) (inv-char-mapping (:dir (first active)))
            :else \X)))
       (println))))
 
@@ -155,31 +166,57 @@
       (is-train? cell) (assert false "trains should be off grid")
       :else (assert false (str "unknown state in grid: " cell)))))
 
+(defn map-index [coll f]
+  (zipmap (map f coll) coll))
+
 (defn tick [grid trains]
-  "Trains are moved in order of their pos."
-  (loop [moved []
-         to-move (sort-by :pos trains)]
-    (if (empty? to-move)
-      moved
-      (let [t (move-train grid (first to-move))
-            trains-at (set (map :pos (concat moved to-move)))]
-        (if (contains? trains-at (:pos t))
-          {:collision (:pos t)}
-          (recur (conj moved t) (rest to-move)))))))
+  "Trains are moved in order of their pos. When trains collide, both
+  are marked with :collided true"
+  (let [collided (filter :collided trains)
+        active (filter (comp not :collided) trains)]
+    (loop [moved collided
+           to-move (sort-by :pos active)]
+      (if (empty? to-move)
+        moved
+        (let [t (move-train grid (first to-move))
+              to-move (rest to-move)
+              active (concat
+                      to-move
+                      (filter (comp not :collided) moved))
+              trains-at (map-index active :pos)]
+          (if-let [t2 (get trains-at (:pos t))]
+            ;; t2 can be in either moved or to-move.
+            ;; remove it from both lists.
+            (let [moved (filter #(not= t2 %) moved)
+                  to-move (filter #(not= t2 %) to-move)
+                  t (assoc t2 :collided true)
+                  t2 (assoc t2 :collided true)]
+              (recur (conj moved t t2) to-move))
+            ;; no collision detected.
+            (recur (conj moved t) to-move)))))))
 
 (defn run [grid trains]
   (iterate (partial tick grid) trains))
 
-(defn find-collision [iter]
-  (->>
-   (map :collision iter)
-   (drop-while nil?)
-   (first)))
-
 (defn solve-part-1 [grid trains]
   (->>
    (run grid trains)
-   (find-collision)
+   (map #(filter :collided %))
+   (drop-while empty?)
+   (first)      ;;in run iteration
+   (map :pos)
+   (sort)       ;; multiple could've happened: sort and,
+   (first)      ;; take the first
+   (str/join ",")))
+
+(defn solve-part-2 [grid trains]
+  (->>
+   (run grid trains)
+   (map #(filter (comp not :collided) %))
+   (drop-while #(> (count %) 1))
+   (first)      ;; in run iteration
+   (first)      ;; there is only one train left
+   :pos
    (str/join ",")))
 
 (defn main
@@ -188,5 +225,6 @@
   (let [grid (parse (read-data))
         trains (find-trains grid)]
     (replace-trains grid trains)
-    (println (solve-part-1 grid trains))))
+    (println (solve-part-1 grid trains))
+    (println (solve-part-2 grid trains))))
 
