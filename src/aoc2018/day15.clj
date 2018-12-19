@@ -31,6 +31,9 @@
 (defn bounds [grid]
   (last (sort (map first grid))))
 
+(defn map-index [f coll]
+  (zipmap (map f coll) coll))
+
 (defn extract-units [grid]
   "Extract units from the grid, leaving only walls/empty."
   (loop [to-process (filter (comp #{:goblin :elf} second) grid)
@@ -40,7 +43,7 @@
     (if (empty? to-process)
       {:grid grid
        :bounds (bounds grid)
-       :units (map-index units :pos)}
+       :units (map-index :id units)}
       (let [[pos unit-type] (first to-process)
             unit {:pos pos
                   :id next-id
@@ -78,9 +81,6 @@
            (not (nil? unit)) ({:goblin \G :elf \E} (:type unit))
            (integer? cell) \U)))
       (println))))
-
-(defn map-index [coll f]
-  (zipmap (map f coll) coll))
 
 (defn map-values [f m]
   (into {} (map (fn [[k v]] [k (f v)]) m)))
@@ -120,53 +120,76 @@
 
 (defn find-targets [{:keys [units]} me]
   (let [not-my-type #(not= (:type %) (:type me))]
-    (into {} (filter (comp not-my-type second) units))))
+    (->> units
+       (vals)
+       (filter not-my-type)
+       (map-index :pos))))
 
 (defn pick-target [game me targets]
   "Returns [path target-pos]"
   (let [graph (to-graph game)]
     (->>
-     (keys targets)
-     (map #(vector %1 (around game %1)))
-     (map-flatten)
-     (map (fn [[k v]] [v k])) ;; swap key and vals
-     (group-by first)
-     (map-first #(loom.alg/bf-path graph me %))
+     (keys targets)                        ;; want only pos of targets
+     (map #(vector %1 (around game %1)))   ;; pos => [around1...N]}
+     (map-flatten)                         ;; [[pos around1] [pos around2]]
+     (map (fn [[k v]] [v k]))              ;; swap key and vals (around => pos)
+     (group-by first)                      ;; around1 => [pos1, pos2]
+     (map-values #(map second %))          ;; strip keys out of groups
+     (map-first #(loom.alg/bf-path graph (:pos me) %))
      (remove (comp nil? first))
-;;     (map-flatten)
-;;     (sort-by (juxt (comp count first) second))
-;;     (first)
-     )))
+     (map-flatten)
+     (sort-by (juxt (comp count first)     ;; length of path
+                    second                 ;; target pos
+                    (comp second first)))  ;; first step
+     (first))))
+
+(defn try-move [game me targets]
+  (let [[path _] (pick-target game me targets)
+        move-to (second path)]
+    (if (nil? move-to)
+      ;; no target to move to, end turn.
+      game
+      ;; move closer to target.
+      (do
+        (assert (contains? (set (around game (:pos me))) move-to))
+        (assert (is-empty? (:grid game) move-to))
+        (-> game
+           (assoc-in [:grid (:pos me)] nil)
+           (assoc-in [:grid move-to] (:id me))
+           (assoc-in [:units (:id me) :pos] move-to))))))
+
+(defn attack [game me adjacent-targets]
+  ;; select target with fewest hp
+  ;; when in tie: sort by reading order.
+  (println "attack" adjacent-targets)
+  game)
 
 (defn step [{:keys [grid units] :as game} me]
-  ;; 0. if no target remain, end the game.
-  ;; 1: if there is a target with :pos (around me)
-  ;;    then attack
-  ;; 2. if there are no open squares in range of a target,
-  ;;    end my turn.
-  ;; 3. consider squares that are in range
-  (let [targets (find-targets game)
-        adjacent-targets (select-keys targets (around grid (:pos me)))]
-    ;; if no targets remain: combat ends.
-    (if (empty? targets)
-      nil
-      ;; if there is a target around me: attack.
-      (if (not (empty? adjacent-targets))
-        ;; select target with fewest hp
-        ;; when in tie: sort by reading order.
-        nil ;; todo call attack function
-        ;; else: try to move closer to the closest target.
-        (let [[path _] (move-pick-target grid me targets)
-              move-to (first path)]
-          (assert (contains? (set (around grid me)) (first path)))
-          {:grid (assoc grid (:pos me) nil move-to (:id me))
-           :units (update-in units [(:id me) ])})
-          ;; update unit pos too.
-         ))))
+  (let [targets (find-targets game me)
+        adjacent-targets (select-keys targets (around game (:pos me)))]
+    (cond
+      ;; no targets remain: combat ends.
+      (empty? targets) nil
+      ;; there is a target around me: attack.
+      (not (empty? adjacent-targets)) (attack game me adjacent-targets)
+      ;; else: try to move one step towards the closest target.
+      :else (try-move game me targets))))
 
-(defn round [grid units]
-  ;; do each step of each unit
-  )
+(defn round [{:keys [units] :as game}]
+  (reduce
+   (fn [game id]
+     (if-let [me (get-in game [:units id])]
+       ;; unit is alive, do step
+       (if-let [new-game (step game me)]
+         new-game
+         (reduced nil))  ;; game ends, short circuit
+       ;; unit is dead
+       game))
+   game
+   (map (comp :id second) units)))
+
+(defn run [game]
+  (iterate round game))
 
 (defn main
   "Advent of Code 2018 - Day 15"
