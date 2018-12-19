@@ -4,7 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [clojure.java-time "0.3.2"]]
+                 [clojure.java-time "0.3.2"]
+                 [aysylu/loom "0.5.4"]]
   :main ^:skip-aot aoc2018.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
