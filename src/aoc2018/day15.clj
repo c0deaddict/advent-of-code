@@ -10,7 +10,7 @@
 
 (defn read-data [] (slurp data-file))
 
-(def test-data (str
+(def test-data-1 (str
 #"#######
 #.G...#
 #...EG#
@@ -19,11 +19,60 @@
 #.....#
 #######"))
 
+(def test-data-2 (str
+#"#######
+#G..#E#
+#E#E.E#
+#G.##.#
+#...#E#
+#...E.#
+#######"))
+
+(def test-data-3 (str
+#"#######
+#E..EG#
+#.#G.E#
+#E.##E#
+#G..#.#
+#..E#.#
+#######"))
+
+(def test-data-4 (str
+#"#######
+#E.G#.#
+#.#G..#
+#G.#.G#
+#G..#.#
+#...E.#
+#######"))
+
+(def test-data-5 (str
+#"#######
+#.E...#
+#.#..G#
+#.###.#
+#E#G#G#
+#...#G#
+#######"))
+
+(def test-data-6 (str
+#"#########
+#G......#
+#.E.#...#
+#..##..G#
+#...##..#
+#...#...#
+#.G...G.#
+#.....G.#
+#########"))
+
 (def char-mapping
   {\# :wall
    \G :goblin
    \E :elf
    \. nil})
+
+(def unit-char {:goblin \G :elf \E})
 
 (defn to-grid [lines]
   (for [[y row] (map vector (range) lines)
@@ -80,12 +129,14 @@
          (cond
            (= :wall cell) \#
            (nil? cell) \.
-           (not (nil? unit)) ({:goblin \G :elf \E} (:type unit))
+           (not (nil? unit)) (unit-char (:type unit))
            (integer? cell) \U)))
-      (println))
-    (println)
-    (doseq [u (vals units)]
-      (println (:id u) (:type u) (:hp u)))))
+      (let [units-in-row (sort-by :pos
+                                  (filter (comp #(= % y) first :pos)
+                                          (vals units)))
+            unit-status #(str (unit-char (:type %)) "(" (:hp %) ")")]
+        (print "  " (str/join ", " (map unit-status units-in-row))))
+      (println))))
 
 (defn map-values [f m]
   (into {} (map (fn [[k v]] [k (f v)]) m)))
@@ -151,21 +202,6 @@
                     (comp second first)))  ;; first step
      (first))))
 
-(defn try-move [game me targets]
-  (let [[path _] (pick-target game me targets)
-        move-to (second path)]
-    (if (nil? move-to)
-      ;; no target to move to, end turn.
-      game
-      ;; move closer to target.
-      (do
-        (assert (contains? (set (around game (:pos me))) move-to))
-        (assert (is-empty? (:grid game) move-to))
-        (-> game
-           (assoc-in [:grid (:pos me)] nil)
-           (assoc-in [:grid move-to] (:id me))
-           (assoc-in [:units (:id me) :pos] move-to))))))
-
 (defn attack [game me targets]
   ;; pick target with fewest hp.
   ;; when in tie; pick the first in reading order (pos).
@@ -179,28 +215,53 @@
        (update-in [:units] dissoc (:id tgt))
        (assoc-in [:grid (:pos tgt)] nil)))))
 
-(defn step [{:keys [grid units] :as game} me]
-  (let [targets (find-targets game me)
-        ;; need around without empties filter.
-        adjacent-targets (select-keys targets
-                                      (all-around game (:pos me)))]
-    (cond
+(defn try-attack
+  ([game me targets]
+   (try-attack game me targets identity))
+  ([game me targets else]
+   (let [positions (all-around game (:pos me))
+         adjacent-targets (select-keys targets positions)]
+     (if (empty? adjacent-targets)
+       (else game)
+       (attack game me adjacent-targets)))))
+
+(defn try-move-and-attack [game me targets]
+  (let [[path _] (pick-target game me targets)
+        move-to (second path)]
+    (if (nil? move-to)
+      ;; no target to move to, end turn.
+      game
+      ;; move closer to target and try to attack.
+      (do
+        (assert (contains? (set (around game (:pos me))) move-to))
+        (assert (is-empty? (:grid game) move-to))
+        (try-attack
+         (-> game
+            (assoc-in [:grid (:pos me)] nil)
+            (assoc-in [:grid move-to] (:id me))
+            (assoc-in [:units (:id me) :pos] move-to))
+         (assoc me :pos move-to)
+         targets)))))
+
+(defn turn [{:keys [grid units] :as game} me]
+  (let [targets (find-targets game me)]
+    (if (empty? targets)
       ;; no targets remain: combat ends.
-      (empty? targets) nil
-      ;; there is a target around me: attack.
-      (not (empty? adjacent-targets)) (attack game me adjacent-targets)
-      ;; else: try to move one step towards the closest target.
-      :else (try-move game me targets))))
+      nil
+      ;; try to attack, if not possible try to move closer to
+      ;; a target and then try to attack again.
+      (try-attack game me targets
+                  #(try-move-and-attack % me targets)))))
 
 (defn round [{:keys [units] :as game}]
   (reduce
    (fn [game id]
      (if-let [me (get-in game [:units id])]
        ;; unit is alive, do step.
-       (if-let [new-game (step game me)]
+       (if-let [new-game (turn game me)]
          new-game
          ;; game ends, short circuit.
-         (reduced nil))
+         (reduced (assoc game :ended true)))
        ;; unit is dead, ignore it.
        game))
    game
@@ -209,7 +270,15 @@
 (defn run [game]
   (iterate round game))
 
+(defn solve-part-1 [game]
+  (let [rounds (take-while (comp not :ended) (run game))
+        end-game (last rounds)
+        nr-rounds (dec (count rounds))
+        total-hp (reduce + (map :hp (vals (:units end-game))))]
+    (println (* nr-rounds total-hp))))
+
 (defn main
   "Advent of Code 2018 - Day 15"
   [& args]
-  (println nil))
+  (let [game (parse (read-data))]
+    (solve-part-1 game)))
