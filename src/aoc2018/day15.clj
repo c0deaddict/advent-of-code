@@ -12,9 +12,11 @@
 
 (def test-data (str
 #"#######
-#E..G.#
-#...#.#
-#.G.#G#
+#.G...#
+#...EG#
+#.#.#G#
+#..G#E#
+#.....#
 #######"))
 
 (def char-mapping
@@ -26,7 +28,7 @@
 (defn to-grid [lines]
   (for [[y row] (map vector (range) lines)
         [x cell] (map vector (range) row)]
-    [[x y] cell]))
+    [[y x] cell]))
 
 (defn bounds [grid]
   (last (sort (map first grid))))
@@ -72,15 +74,18 @@
     (doseq [y (range (inc height))]
       (print (format "%2d " y))
       (doseq [x (range (inc width))
-              :let [cell (get grid [x y])
-                    unit (get units [x y])]]
+              :let [cell (get grid [y x])
+                    unit (get units cell)]]
         (print
          (cond
            (= :wall cell) \#
            (nil? cell) \.
            (not (nil? unit)) ({:goblin \G :elf \E} (:type unit))
            (integer? cell) \U)))
-      (println))))
+      (println))
+    (println)
+    (doseq [u (vals units)]
+      (println (:id u) (:type u) (:hp u)))))
 
 (defn map-values [f m]
   (into {} (map (fn [[k v]] [k (f v)]) m)))
@@ -94,19 +99,22 @@
 (defn map-first [f m]
   (map (fn [[k v]] [(f k) v]) m))
 
-(defn in-bounds? [[w h] [x y]]
+(defn in-bounds? [[h w] [y x]]
   (and (<= 0 x w) (<= 0 y h)))
 
 (defn is-empty? [grid pos]
   (nil? (get grid pos)))
 
-(defn around [{:keys [grid bounds]} [x y]]
-  (filter #(and (is-empty? grid %)
-               (in-bounds? bounds %))
-          [[x (dec y)]
-           [(dec x) y]
-           [(inc x) y]
-           [x (inc y)]]))
+(defn all-around [{:keys [grid bounds]} [y x]]
+  (filter (partial in-bounds? bounds)
+          [[y (dec x)]
+           [(dec y) x]
+           [(inc y) x]
+           [y (inc x)]]))
+
+(defn around [{:keys [grid] :as game} pos]
+  (filter (partial is-empty? grid)
+          (all-around game pos)))
 
 (defn to-graph [{:keys [grid] :as game}]
   (->> grid
@@ -158,15 +166,24 @@
            (assoc-in [:grid move-to] (:id me))
            (assoc-in [:units (:id me) :pos] move-to))))))
 
-(defn attack [game me adjacent-targets]
-  ;; select target with fewest hp
-  ;; when in tie: sort by reading order.
-  (println "attack" adjacent-targets)
-  game)
+(defn attack [game me targets]
+  ;; pick target with fewest hp.
+  ;; when in tie; pick the first in reading order (pos).
+  (let [tgt (first (sort-by (juxt :hp :pos) (vals targets)))
+        hp (- (:hp tgt) (:attack me))]
+    (if (pos? hp)
+      ;; target still alive, update game state.
+      (assoc-in game [:units (:id tgt) :hp] hp)
+      ;; target is dead, remove it from the units and grid.
+      (-> game
+       (update-in [:units] dissoc (:id tgt))
+       (assoc-in [:grid (:pos tgt)] nil)))))
 
 (defn step [{:keys [grid units] :as game} me]
   (let [targets (find-targets game me)
-        adjacent-targets (select-keys targets (around game (:pos me)))]
+        ;; need around without empties filter.
+        adjacent-targets (select-keys targets
+                                      (all-around game (:pos me)))]
     (cond
       ;; no targets remain: combat ends.
       (empty? targets) nil
@@ -179,11 +196,12 @@
   (reduce
    (fn [game id]
      (if-let [me (get-in game [:units id])]
-       ;; unit is alive, do step
+       ;; unit is alive, do step.
        (if-let [new-game (step game me)]
          new-game
-         (reduced nil))  ;; game ends, short circuit
-       ;; unit is dead
+         ;; game ends, short circuit.
+         (reduced nil))
+       ;; unit is dead, ignore it.
        game))
    game
    (map (comp :id second) units)))
