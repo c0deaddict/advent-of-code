@@ -1,14 +1,14 @@
 (ns aoc2018.day16
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.test :as t]
-           [clojure.pprint :refer [pprint]]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :as t]
+            [clojure.pprint :refer [pprint]]
+            [aoc2018.utils :refer :all]
+            [rolling-stones.core :as sat]))
 
 (def data-file (io/resource "day16.txt"))
 
 (defn read-data [] (slurp data-file))
-
-(defn to-int [s] (Integer. s))
 
 (defn parse-sample [[before instr after]]
   (let [[_ before ] (re-matches #"Before:\s*\[([^\]]+)\]" before)
@@ -24,6 +24,16 @@
      (remove empty?)
      (partition 3)
      (map parse-sample)))
+
+(def prog-file (io/resource "day16_2.txt"))
+
+(defn read-prog [] (slurp prog-file))
+
+(defn parse-prog [data]
+  (->> data
+     (str/split-lines)
+     (map #(str/split % #"\s+"))
+     (map #(map to-int %))))
 
 (defn opcodes [reg-file]
   (let [st (fn [i v] (assoc reg-file i v))
@@ -54,18 +64,51 @@
 
 (defn match-opcodes [[before instr after]]
   (->> all-opcodes
-     (map #(exec-instr % (rest instr) before))
-     (filter (partial = after))
-     (count)))
+     (map (fn [op]
+            (if (= after (exec-instr op (rest instr) before))
+              [op (first instr)]
+              nil)))
+     (remove nil?)))
 
 (defn solve-part-1 [samples]
   (->> samples
      (map match-opcodes)
+     (map count)
      (filter #(>= % 3))
      (count)))
+
+(defn opcode-constraint [[op idx]]
+  (->>
+   (range (count all-opcodes))
+   (remove #{idx})
+   (map #(sat/! [op %]))
+   (cons [op idx])
+   (apply sat/AND)))
+
+(defn solve-opcodes [samples]
+  (->> samples
+     (map match-opcodes)
+     (map #(sat/exactly 1 (map opcode-constraint %)))
+     (sat/solve-symbolic-formula)
+     (filter sat/positive?)
+     (into {})))
+
+(defn run-prog [prog opcode-table]
+  (reduce (fn [reg-file [opcode & args]]
+            (exec-instr (opcode-table opcode)
+                        args reg-file))
+          [0 0 0 0]
+          prog))
+
+(defn solve-part-2 [samples prog]
+  (let [solution (solve-opcodes samples)
+        opcode-table (into {} (map swp solution))]
+    (run-prog prog opcode-table)))
 
 (defn main
   "Advent of Code 2018 - Day 16"
   [& args]
-  (let [samples (parse (read-data))]
-    (println (solve-part-1 samples))))
+  (let [samples (parse (read-data))
+        prog (parse-prog (read-prog))]
+    (println (solve-part-1 samples))
+    (println (solve-part-2 samples prog))))

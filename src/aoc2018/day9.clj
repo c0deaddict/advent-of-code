@@ -1,9 +1,9 @@
 (ns aoc2018.day9
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.set]
-           [clojure.pprint :refer [pprint]]
-           [clojure.test :as t]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.set]
+            [clojure.pprint :refer [pprint]]
+            [clojure.test :as t]))
 
 (definterface INode
   (getPrev [])

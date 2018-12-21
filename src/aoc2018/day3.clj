@@ -1,7 +1,7 @@
 (ns aoc2018.day3
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.set]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.set]))
 
 (defn parse-claim
   [str]

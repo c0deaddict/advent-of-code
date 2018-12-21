@@ -1,7 +1,7 @@
 (ns aoc2018.day13
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.test :as t]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :as t]))
 
 (def data-file (io/resource "day13.txt"))
 

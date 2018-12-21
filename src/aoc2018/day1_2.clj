@@ -1,6 +1,6 @@
 (ns aoc2018.day1_2
-  (require [clojure.java.io :as io]
-           [clojure.string :as s]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]))
 
 
 (defn find-double

@@ -1,8 +1,8 @@
 (ns aoc2018.day6
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.set]
-           [clojure.pprint :refer [pprint]]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.set]
+            [clojure.pprint :refer [pprint]]))
 
 (def data-file (io/resource "day6.txt"))
 

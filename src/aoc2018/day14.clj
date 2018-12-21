@@ -1,7 +1,7 @@
 (ns aoc2018.day14
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.test :as t]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :as t]))
 
 (def my-input 652601)
 

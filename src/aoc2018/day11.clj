@@ -1,7 +1,7 @@
 (ns aoc2018.day11
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.test :as t]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :as t]))
 
 (def my-grid-serial 9995)
 (def grid-size 300)

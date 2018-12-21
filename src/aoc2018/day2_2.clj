@@ -1,6 +1,6 @@
 (ns aoc2018.day2_2
-  (require [clojure.java.io :as io]
-           [clojure.string :as s]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]))
 
 (defn compare-ids
   "Compare ids `a` and `b` returning the letters that match."

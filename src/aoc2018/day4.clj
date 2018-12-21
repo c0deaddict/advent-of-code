@@ -1,8 +1,8 @@
 (ns aoc2018.day4
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [java-time :as time]
-           [clojure.set]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [java-time :as time]
+            [clojure.set]))
 
 (defn parse-line
   [str]

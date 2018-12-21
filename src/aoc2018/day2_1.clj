@@ -1,6 +1,6 @@
 (ns aoc2018.day2_1
-  (require [clojure.java.io :as io]
-           [clojure.string :as s]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]))
 
 
 ;; https://stackoverflow.com/a/1677927/248948

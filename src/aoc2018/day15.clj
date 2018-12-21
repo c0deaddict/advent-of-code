@@ -1,11 +1,11 @@
 (ns aoc2018.day15
-  (require [clojure.java.io :as io]
-           [clojure.string :as str]
-           [clojure.test :as t]
-           [clojure.pprint :refer [pprint]]
-           [loom.graph]
-           [loom.alg]
-           [loom.alg-generic]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :as t]
+            [clojure.pprint :refer [pprint]]
+            [loom.graph]
+            [loom.alg]
+            [loom.alg-generic]))
 
 (def data-file (io/resource "day15.txt"))
 
@@ -213,7 +213,7 @@
    (loom.graph/graph)))
 
 (defn shortest-path [game from to]
-  (loom.alg/bf-path (to-graph game) from to))
+  (loom.alg/bf-path (to-loom-graph game) from to))
 
 (defn all-shortest-paths [graph start end]
   (let [succ (loom.graph/successors graph)]
