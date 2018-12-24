@@ -24,3 +24,13 @@
 
 (defn map-first [f m]
   (map (fn [[k v]] [(f k) v]) m))
+
+(defn min-max [coll]
+  [(reduce min coll)
+   (reduce max coll)])
+
+(defn exp [x n]
+  (reduce * (repeat n x)))
+
+(defn nth-digit [idx num]
+  (mod (quot num (exp 10 idx)) 10))
