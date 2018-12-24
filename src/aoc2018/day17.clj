@@ -19,6 +19,20 @@ x=498, y=10..13
 x=504, y=10..13
 y=13, x=498..504")
 
+;; bucket with subbucket of 1 wide
+(def test-data-2
+"x=495, y=2..7
+y=7, x=495..501
+x=501, y=3..7
+x=498, y=2..4
+x=506, y=1..2
+x=498, y=10..16
+x=506, y=10..16
+y=16, x=498..506
+x=504, y=12..14
+x=502, y=12..14
+y=14, x=502..504")
+
 (defn parse-sample [[before instr after]]
   (let [[_ before ] (re-matches #"Before:\s*\[([^\]]+)\]" before)
         [_ after] (re-matches #"After:\s*\[([^\]]+)\]" after)
@@ -90,8 +104,8 @@ y=13, x=498..504")
 (defn scan-in-dir [tiles dir start]
   (loop [pos start]
     (cond
-      (clay-beside-me tiles dir pos) [pos :side]
       (not (clay-below-me tiles pos)) [pos :down]
+      (clay-beside-me tiles dir pos) [pos :side]
       :else (recur (move-x dir pos)))))
 
 (defn fill-line [tiles [left-x left-y] [right-x right-y] v]
@@ -144,13 +158,22 @@ y=13, x=498..504")
   (->> state
      (flow [500 0])
      (:tiles)
-     (filter (comp #(>= % (:y-min state)) second first))
+     (filter (comp #(<= (:y-min state) % (:y-max state)) second first))
      (vals)
      (filter #{:flow :rest})
+     (count)))
+
+(defn solve-part-2 [state]
+  (->> state
+     (flow [500 0])
+     (:tiles)
+     (vals)
+     (filter #{:rest})
      (count)))
 
 (defn main
   "Advent of Code 2018 - Day 17"
   [& args]
   (let [state (parse (read-data))]
-    (println (solve-part-1 state))))
+    (println (solve-part-1 state))
+    (println (solve-part-2 state))))
