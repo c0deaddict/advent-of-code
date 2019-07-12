@@ -9,7 +9,8 @@
 ;;                 [org.clojure/spec.alpha "0.2.176"]
                  [org.clojure/spec.alpha "0.1.143"]
                  [rolling-stones "1.0.0-SNAPSHOT"]
-                 [instaparse "1.4.10"]]
+                 [instaparse "1.4.10"]
+                 [org.clojure/data.priority-map "0.0.10"]]
   :main ^:skip-aot aoc2018.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}

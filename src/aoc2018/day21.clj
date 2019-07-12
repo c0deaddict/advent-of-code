@@ -15,7 +15,7 @@
 
 (defn parse-instr [line]
   (let [[op & args] (str/split line #" ")]
-    (concat [(keyword  op)] (map to-int args))))
+    (concat [(keyword op)] (map to-int args))))
 
 (defn parse [data]
   (let [[hdr & lines] (str/split-lines data)

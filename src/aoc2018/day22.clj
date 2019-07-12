@@ -5,7 +5,8 @@
             [clojure.pprint :refer [pprint]]
             [aoc2018.utils :refer :all]
             [loom.graph]
-            [loom.alg]))
+            [loom.alg]
+            [clojure.data.priority-map :refer [priority-map]]))
 
 ;; puzzle input:
 (def my-input
@@ -118,6 +119,32 @@
   (+ (Math/abs (- x2 x1))
      (Math/abs (- y2 y1))))
 
+(defn astar-dist [graph start end heur]
+  (loop [frontier (priority-map start 0)
+         cost-so-far {start 0}]
+    (let [[current _] (peek frontier)
+          frontier (pop frontier)]
+      (println current)
+      (cond
+        (nil? current) nil
+        (= current end) (cost-so-far end)
+        :else
+        (let [[frontier cost-so-far]
+              (loop [frontier frontier
+                     cost-so-far cost-so-far
+                     [[next cost] & neighbours] (graph current)]
+                (if (nil? next)
+                  [frontier cost-so-far]
+                  (let [new-cost (+ (cost-so-far current) cost)
+                        cur-cost (get cost-so-far next)]
+                    (if (or (nil? cur-cost)
+                            (< new-cost cur-cost))
+                      (recur (assoc frontier next (+ new-cost (heur end next)))
+                             (assoc cost-so-far next new-cost)
+                             neighbours)
+                      (recur frontier cost-so-far neighbours)))))]
+          (recur frontier cost-so-far))))))
+
 (defn solve-part-2 [{:keys [target] :as input}]
   ;; search in an area twice the space to target.
   (let [bounds (map #(+ % 10) target)
@@ -125,12 +152,18 @@
         graph (loom.graph/weighted-graph (to-graph cave))
         start [[0 0] :torch]
         end [target :torch]
-        alg :astar]
+        alg :astar-custom]
+    (println target)
     (println (count (loom.graph/edges graph)))
     (case alg
-      :astar
-      (loom.alg/astar-dist graph start end
-                           (fn [_ [pos  _]] (manhattan-distance pos target)))
+      :astar-custom
+      (astar-dist (to-graph cave) start [target :torch]
+                  (fn [[a _] [b _]]
+                    (manhattan-distance a b)))
+      :astar-loom
+      (loom.alg/astar-path graph start [target :torch]
+                           (fn [[a _] [b _]]
+                             (manhattan-distance a b)))
       :dijkstra
       (second (loom.alg/dijkstra-path-dist graph start end)))))
 
