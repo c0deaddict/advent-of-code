@@ -3,19 +3,15 @@ defmodule AdventOfCode.Day04Test do
 
   import AdventOfCode.Day04
 
-  @tag :skip
   test "part1" do
-    input = nil
-    result = part1(input)
-
-    assert result
+    assert password?(111111)
+    assert not password?(223450)
+    assert not password?(123789)
   end
 
-  @tag :skip
   test "part2" do
-    input = nil
-    result = part2(input)
-
-    assert result
+    assert has_group_of_two?(112233)
+    assert not has_group_of_two?(123444)
+    assert has_group_of_two?(111122)
   end
 end
