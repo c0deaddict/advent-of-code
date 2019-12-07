@@ -46,6 +46,7 @@ defmodule AdventOfCode.Day06 do
 
   def path(parents, key, acc \\ []) do
     acc = [key | acc]
+
     case parents[key] do
       nil -> acc
       p -> path(parents, p, acc)
@@ -59,9 +60,10 @@ defmodule AdventOfCode.Day06 do
     santa_path = path(parents, "SAN")
 
     # calculate the longest common prefix
-    prefix_len = Enum.zip(you_path, santa_path)
-    |> Enum.find_index(fn({a, b}) -> a != b end)
+    prefix_len =
+      Enum.zip(you_path, santa_path)
+      |> Enum.find_index(fn {a, b} -> a != b end)
 
-    (length(you_path) - prefix_len - 1) + (length(santa_path) - prefix_len - 1)
+    length(you_path) - prefix_len - 1 + (length(santa_path) - prefix_len - 1)
   end
 end
