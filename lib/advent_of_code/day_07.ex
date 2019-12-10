@@ -42,7 +42,13 @@ defmodule AdventOfCode.Day07 do
       nil
     end
 
-    state = IntCode.run_program({program, {input, output}, 0})
+    state = %IntCode.State{
+      program: program,
+      input: input,
+      output: output
+    }
+
+    state = IntCode.run_program(state)
     send(parent_pid, {:halt, self(), state})
   end
 

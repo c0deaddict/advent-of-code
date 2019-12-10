@@ -1,7 +1,17 @@
 defmodule AdventOfCode.Day09 do
-  def part1(args) do
+  alias AdventOfCode.Day05, as: IntCode
+
+  def run(program_str, input) do
+    program_str
+    |> IntCode.parse()
+    |> IntCode.run(input)
   end
 
-  def part2(args) do
+  def part1(program_str) do
+    run(program_str, [1])
+  end
+
+  def part2(program_str) do
+    run(program_str, [2])
   end
 end
