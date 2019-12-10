@@ -19,22 +19,21 @@ defmodule AdventOfCode.Day05 do
     {put_elem(program, res, lhs * rhs), io, ip + 4}
   end
 
-  def op_input({program, io, ip}, res) do
-    {input, output} = io
-
-    case input do
-      [] ->
-        raise "input exhausted"
-
-      [value | input] ->
-        program = put_elem(program, res, value)
-        {program, {input, output}, ip + 2}
-    end
+  def op_input({program, {input, output}, ip}, res) do
+    {value, new_input} = input.()
+    program = put_elem(program, res, value)
+    {program, {new_input || input, output}, ip + 2}
   end
 
   def op_output({program, {input, output}, ip}, res) do
-    output = [elem(program, res) | output]
-    {program, {input, output}, ip + 2}
+    value = elem(program, res)
+
+    if value == nil do
+      raise "output nil is not allowed"
+    end
+
+    new_output = output.(value)
+    {program, {input, new_output || output}, ip + 2}
   end
 
   def op_jump_if_true({program, io, ip}, test, branch) do
@@ -79,8 +78,8 @@ defmodule AdventOfCode.Day05 do
     {args, _} =
       1..num_args
       |> Enum.map(&elem(program, ip + &1))
-      |> Enum.with_index
-      |> Enum.map_reduce(div(opcode, 100), fn({arg, i}, modes) ->
+      |> Enum.with_index()
+      |> Enum.map_reduce(div(opcode, 100), fn {arg, i}, modes ->
         is_out = Enum.member?(out_args, i)
 
         arg =
@@ -107,19 +106,45 @@ defmodule AdventOfCode.Day05 do
     end
   end
 
-  def run(program_str, input) do
-    program = parse(program_str)
-    io = {input, []}
+  # Elixir has really immutable state. Closing over the list is not enough to
+  # keep state. By returning a new function we can keep state.
+  def input_from_list(input_list) do
+    fn ->
+      case input_list do
+        [] ->
+          raise "input exhausted"
+
+        [value | rest] ->
+          {value, input_from_list(rest)}
+      end
+    end
+  end
+
+  def output_to_list(output_list) do
+    fn
+      nil -> output_list
+      value -> output_to_list([value | output_list])
+    end
+  end
+
+  def run(program, input_list) do
+    io = {input_from_list(input_list), output_to_list([])}
     state = run_program({program, io, 0})
     {_, {_, output}, _} = state
-    Enum.reverse(output)
+    Enum.reverse(output.(nil))
   end
 
   def part1(program_str) do
-    run(program_str, [1]) |> List.last
+    program_str
+    |> parse
+    |> run([1])
+    |> List.last()
   end
 
   def part2(program_str) do
-    run(program_str, [5]) |> List.last
+    program_str
+    |> parse
+    |> run([5])
+    |> List.last()
   end
 end
