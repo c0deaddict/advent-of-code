@@ -72,10 +72,9 @@ defmodule AdventOfCode.Day11 do
   end
 
   def run_painter(program_str, image) do
-    robot_pid =
-      IntCode.parse(program_str)
-      |> spawn_robot(self())
-      |> painter(%State{image: image})
+    IntCode.parse(program_str)
+    |> spawn_robot(self())
+    |> painter(%State{image: image})
   end
 
   def part1(program_str) do
