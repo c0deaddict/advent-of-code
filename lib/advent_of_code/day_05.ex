@@ -191,6 +191,29 @@ defmodule AdventOfCode.Day05 do
     Enum.reverse(state.output.(nil))
   end
 
+  def run_async(program, parent_pid) do
+    input = fn ->
+      receive do
+        {:input, value} ->
+          {value, nil}
+      end
+    end
+
+    output = fn value ->
+      send(parent_pid, {:output, self(), value})
+      nil
+    end
+
+    state = %State{
+      program: program,
+      input: input,
+      output: output
+    }
+
+    state = run_program(state)
+    send(parent_pid, {:halt, self(), state})
+  end
+
   def part1(program_str) do
     program_str
     |> parse

@@ -5,12 +5,14 @@ defmodule AdventOfCode.Day02 do
 
   def run_op(program, ip) do
     op = elem(program, ip)
-    f = case op do
-      99 -> raise "halt"
-      1 -> &+/2
-      2 -> &*/2
-      _ -> raise "unknown op"
-    end
+
+    f =
+      case op do
+        99 -> raise "halt"
+        1 -> &+/2
+        2 -> &*/2
+        _ -> raise "unknown op"
+      end
 
     lhs_addr = elem(program, ip + 1)
     rhs_addr = elem(program, ip + 2)
@@ -47,10 +49,11 @@ defmodule AdventOfCode.Day02 do
   end
 
   def part2(program) do
-    {noun, verb} = cart_product(0..99, 0..99)
-    |> Enum.find(fn {noun, verb} ->
-      compute_pair(program, noun, verb) == 19690720
-    end)
+    {noun, verb} =
+      cart_product(0..99, 0..99)
+      |> Enum.find(fn {noun, verb} ->
+        compute_pair(program, noun, verb) == 19_690_720
+      end)
 
     100 * noun + verb
   end

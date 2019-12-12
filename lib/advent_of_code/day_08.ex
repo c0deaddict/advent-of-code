@@ -1,22 +1,24 @@
 defmodule AdventOfCode.Day08 do
   def frequencies(enumerable) do
-    enumerable |> Enum.reduce(%{}, fn x, acc ->
+    enumerable
+    |> Enum.reduce(%{}, fn x, acc ->
       Map.update(acc, x, 1, &(&1 + 1))
     end)
   end
 
   def parse([input, width, height]) do
     input
-    |> String.trim
-    |> String.codepoints
+    |> String.trim()
+    |> String.codepoints()
     |> Enum.map(&String.to_integer/1)
     |> Enum.chunk_every(width * height)
   end
 
   def part1(args) do
-    least_zeroes = parse(args)
-    |> Enum.map(&frequencies/1)
-    |> Enum.min_by(&Map.get(&1, 0, 0))
+    least_zeroes =
+      parse(args)
+      |> Enum.map(&frequencies/1)
+      |> Enum.min_by(&Map.get(&1, 0, 0))
 
     Map.get(least_zeroes, 1, 0) * Map.get(least_zeroes, 2, 0)
   end

@@ -17,6 +17,7 @@ defmodule AdventOfCode.Day06Test do
     J)K
     K)L
     """
+
     assert part1(input) == 42
   end
 
@@ -36,6 +37,7 @@ defmodule AdventOfCode.Day06Test do
     K)YOU
     I)SAN
     """
+
     assert part2(input) == 4
   end
 end

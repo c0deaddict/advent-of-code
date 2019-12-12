@@ -27,7 +27,7 @@ defmodule AdventOfCode.Day03 do
       pos = {x + dx, y + dy}
       [pos | res]
     end)
-    |> Enum.reverse
+    |> Enum.reverse()
   end
 
   def manhattan_distance({x, y}), do: abs(x) + abs(y)

@@ -29,29 +29,6 @@ defmodule AdventOfCode.Day07 do
     |> Enum.max_by(&hd/1)
   end
 
-  def run_async(program, parent_pid) do
-    input = fn ->
-      receive do
-        {:input, value} ->
-          {value, nil}
-      end
-    end
-
-    output = fn value ->
-      send(parent_pid, {:output, self(), value})
-      nil
-    end
-
-    state = %IntCode.State{
-      program: program,
-      input: input,
-      output: output
-    }
-
-    state = IntCode.run_program(state)
-    send(parent_pid, {:halt, self(), state})
-  end
-
   def rotate_left(list), do: tl(list) ++ [hd(list)]
 
   def run_amps_feedback(program, phase_settings) do
@@ -61,7 +38,7 @@ defmodule AdventOfCode.Day07 do
     phases =
       phase_settings
       |> Enum.map(fn phase ->
-        pid = spawn_link(fn -> run_async(program, my_pid) end)
+        pid = spawn_link(fn -> IntCode.run_async(program, my_pid) end)
         # Initialize with phase.
         send(pid, {:input, phase})
         pid
