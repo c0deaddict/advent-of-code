@@ -87,6 +87,52 @@ defmodule AdventOfCode.Day12 do
     |> total_energy
   end
 
-  def part2(args) do
+  def find_cycle(stream) do
+    stream
+    |> Enum.reduce_while(Map.new(), fn i, acc ->
+      case Map.get(acc, i) do
+        nil ->
+          {:cont, Map.put(acc, i, map_size(acc))}
+
+        start ->
+          {:halt, {start, map_size(acc)}}
+      end
+    end)
+  end
+
+  def select_dim(moons, dim) do
+    moons
+    |> Enum.map(fn {pos, velocity} ->
+      {elem(pos, dim), elem(velocity, dim)}
+    end)
+  end
+
+  def find_cycle_per_dim(simulation) do
+    0..2
+    |> Enum.map(fn dim ->
+      simulation
+      |> Stream.map(&select_dim(&1, dim))
+      |> find_cycle
+    end)
+  end
+
+  def gcd(a, 0), do: a
+  def gcd(a, b), do: gcd(b, rem(a, b))
+  def gcd(a, b, c), do: gcd(a, gcd(b, c))
+
+  def lcm(a, b), do: div(a * b, gcd(a, b))
+
+  def lcm(a, b, c) do
+    lcm_bc = lcm(b, c)
+    div(a * lcm_bc, gcd(a, lcm_bc))
+  end
+
+  def part2(input) do
+    [{0, x}, {0, y}, {0, z}] =
+      parse(input)
+      |> simulate
+      |> find_cycle_per_dim
+
+    lcm(x, y, z)
   end
 end
