@@ -106,6 +106,6 @@ defmodule AdventOfCode.Day12Test do
     <x=9, y=-8, z=-3>
     """
 
-    assert part2(input) == 4686774924
+    assert part2(input) == 4_686_774_924
   end
 end

@@ -193,6 +193,8 @@ defmodule AdventOfCode.Day05 do
 
   def run_async(program, parent_pid) do
     input = fn ->
+      send(parent_pid, {:request_input, self()})
+
       receive do
         {:input, value} ->
           {value, nil}
