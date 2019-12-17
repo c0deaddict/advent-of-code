@@ -75,8 +75,12 @@ defmodule AdventOfCode.Day15 do
     end
   end
 
-  def find_oxygen(droid, visual, state = %{:image => image, :pos => pos, :path => [step | next_path]}) do
-    state = %{state | path: next_path }
+  def find_oxygen(
+        droid,
+        visual,
+        state = %{:image => image, :pos => pos, :path => [step | next_path]}
+      ) do
+    state = %{state | path: next_path}
     pos = move(pos, step)
 
     send(droid, {:input, encode_dir(step)})
@@ -92,7 +96,7 @@ defmodule AdventOfCode.Day15 do
 
         {:output, _, 2} ->
           image = Map.put(image, pos, :oxygen)
-          %{state | pos: pos, oxygen: pos}
+          %{state | image: image, pos: pos, oxygen: pos}
       end
 
     if visual do
@@ -136,6 +140,7 @@ defmodule AdventOfCode.Day15 do
             :wall -> "#"
             :droid -> "D"
             :path -> "*"
+            :oxygen -> "O"
           end
         end)
 
@@ -181,6 +186,75 @@ defmodule AdventOfCode.Day15 do
     length(shortest_path)
   end
 
+  def fill_oxygen(image, visual, oxygen) do
+    seen = MapSet.new()
+    frontier = [oxygen]
+    fill_oxygen(image, visual, seen, frontier, 0) - 1
+  end
+
+  def fill_oxygen(_, _, _, [], acc), do: acc
+
+  def fill_oxygen(image, visual, seen, frontier, acc) do
+    frontier =
+      frontier
+      |> Stream.map(&neighbours/1)
+      |> Stream.map(&Enum.map(&1, fn {_, pos} -> pos end))
+      |> Stream.concat()
+      |> Stream.uniq()
+      |> Stream.reject(&(Map.get(image, &1) == :wall))
+      |> Stream.reject(&MapSet.member?(seen, &1))
+      |> Enum.to_list()
+
+    seen =
+      frontier
+      |> MapSet.new()
+      |> MapSet.union(seen)
+
+    image =
+      frontier
+      |> Enum.reduce(image, fn pos, image ->
+        Map.put(image, pos, :oxygen)
+      end)
+
+    if visual do
+      draw_image(image)
+    end
+
+    fill_oxygen(image, visual, seen, frontier, acc + 1)
+  end
+
+  def parse_image(input) do
+    input
+    |> String.trim_trailing("\n")
+    |> String.split("\n")
+    |> Stream.with_index()
+    |> Enum.reduce(%{}, fn {line, y}, image ->
+      line
+      |> String.codepoints()
+      |> Stream.with_index()
+      |> Enum.reduce(image, fn
+        {" ", _}, image ->
+          image
+
+        {ch, x}, image ->
+          tile =
+            case ch do
+              "#" -> :wall
+              "." -> :empty
+              "O" -> :oxygen
+            end
+
+          Map.put(image, {x, y}, tile)
+      end)
+    end)
+  end
+
   def part2(program_str, visual \\ false) do
+    %{:image => image, :oxygen => oxygen} =
+      program_str
+      |> IntCode.parse()
+      |> run(visual)
+
+    fill_oxygen(image, visual, oxygen)
   end
 end
