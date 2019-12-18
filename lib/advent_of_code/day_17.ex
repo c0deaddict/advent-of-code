@@ -178,6 +178,9 @@ defmodule AdventOfCode.Day17 do
         empty = MapSet.new()
         ^empty = MapSet.difference(all_pos, visited)
 
+        # TODO Step to our current position? or do we fall over the edge?
+        # [{^dir, steps} | rest] = path
+        # path = [{dir, steps + 1} | rest]
         Enum.reverse(path)
     end
   end
@@ -217,6 +220,9 @@ defmodule AdventOfCode.Day17 do
     path = find_path(image, pos, dir, MapSet.new(), [{dir, 0}])
     draw_path(image, pos, path)
     |> draw_image_map
+
+    # TODO: convert dirs in path to turns (zip with path shifted)
+    # TODO: find repeating patterns?
 
     robot
     |> qa("Main:", "A,A,B,B,C,C,A,B,C")
