@@ -27,17 +27,18 @@ defmodule AdventOfCode.Day16 do
         if out_pos == 0 do
           signal_len
         else
-          IO.inspect({signal_len, out_pos*4, lcm(signal_len, out_pos*4)})
+          # IO.inspect({signal_len, out_pos*4, lcm(signal_len, out_pos*4)})
           lcm(signal_len, out_pos * 4)
         end
 
-      const = if cycle < signal_len do
-        div(signal_len, cycle)
-      else
-        1
-      end
+      const =
+        if cycle < signal_len do
+          div(signal_len, cycle)
+        else
+          1
+        end
 
-      IO.inspect({cycle, const})
+      # IO.inspect({cycle, const})
 
       Stream.concat([0], repeat(signal, times))
       |> Enum.take(cycle + 1)

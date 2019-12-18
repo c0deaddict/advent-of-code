@@ -3,12 +3,23 @@ defmodule AdventOfCode.Day17Test do
 
   import AdventOfCode.Day17
 
-  @tag :skip
   test "part1" do
-    input = nil
-    result = part1(input)
+    input = """
+    ..#..........
+    ..#..........
+    #######...###
+    #.#...#...#.#
+    #############
+    ..#...#...#..
+    ..#####...^..
+    """
 
-    assert result
+    result =
+      input
+      |> parse_image()
+      |> calibrate()
+
+    assert result == 76
   end
 
   @tag :skip

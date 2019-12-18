@@ -6,9 +6,10 @@ defmodule AdventOfCode.Day16Test do
   test "part 1 test 1" do
     input = "12345678"
 
-    result = input
-    |> parse
-    |> run(4)
+    result =
+      input
+      |> parse
+      |> run(4)
 
     assert result = parse("01029498")
   end
@@ -28,6 +29,7 @@ defmodule AdventOfCode.Day16Test do
     assert part1(input) == "52432133"
   end
 
+  @tag :skip
   test "part2" do
     input = nil
     result = part2(input)
