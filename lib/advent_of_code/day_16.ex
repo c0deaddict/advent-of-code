@@ -18,38 +18,63 @@ defmodule AdventOfCode.Day16 do
     |> Stream.cycle()
   end
 
-  def phase(signal, times) do
-    signal_len = length(signal)
+  def transpose([]), do: []
+  def transpose([[]|_]), do: []
+  def transpose(a) do
+    [Enum.map(a, &hd/1) | transpose(Enum.map(a, &tl/1))]
+  end
 
-    0..(signal_len - 1)
+  def phase(signal, len, times) do
+    0..(len * times)-1
     |> Enum.map(fn out_pos ->
-      cycle =
-        if out_pos == 0 do
-          signal_len
-        else
-          # IO.inspect({signal_len, out_pos*4, lcm(signal_len, out_pos*4)})
-          lcm(signal_len, out_pos * 4)
-        end
-
-      const =
-        if cycle < signal_len do
-          div(signal_len, cycle)
-        else
-          1
-        end
-
-      # IO.inspect({cycle, const})
-
-      Stream.concat([0], repeat(signal, times))
-      |> Enum.take(cycle + 1)
-      |> Stream.zip(pattern(out_pos, const))
+      pattern(out_pos, 1)
+      |> Stream.drop(1)
+      |> Stream.take(len * times)
+      |> Enum.chunk_every(len)
+      |> transpose()
+      |> Enum.map(&Enum.sum/1)
+      |> Stream.zip(signal)
       |> Enum.reduce(0, fn {a, b}, acc -> acc + a * b end)
       |> last_digit()
     end)
   end
 
+  def correct_phase(signal, len, times) do
+    0..(len * times)-1
+    |> Enum.map(fn out_pos ->
+      Stream.concat([0], signal)
+      |> Stream.zip(pattern(out_pos, 1))
+      |> Enum.reduce(0, fn {a, b}, acc -> acc + a * b end)
+      |> last_digit()
+    end)
+  end
+
+  def find_cycle(stream) do
+    stream
+    |> Enum.reduce_while(Map.new(), fn i, acc ->
+      case Map.get(acc, i) do
+        nil ->
+          {:cont, Map.put(acc, i, map_size(acc))}
+
+        start ->
+          {:halt, {start, map_size(acc)}}
+      end
+    end)
+  end
+
+  def print(signal, len) do
+    signal
+    |> Enum.chunk_every(len)
+    |> Enum.map(&Enum.join(&1, ""))
+    |> Enum.join(" ")
+    |> IO.puts
+  end
+
   def run(signal, num_phases, times \\ 1) do
-    Stream.iterate(signal, &phase(&1, times))
+    len = length(signal)
+    signal = repeat(signal, times)
+    Stream.iterate(signal, &phase(&1, len, times))
+    |> Stream.each(&print(&1, len))
     |> Stream.drop(num_phases)
     |> Enum.at(0)
   end
@@ -70,8 +95,21 @@ defmodule AdventOfCode.Day16 do
   end
 
   def part2(input) do
-    input
-    |> parse
-    |> run(1, 10000)
+    signal = parse("12345678")
+    times = 2
+    len = length(signal)
+    num = 2
+
+    signal
+    |> repeat(times)
+    |> Stream.iterate(&correct_phase(&1, len, times))
+    |> Stream.each(&print(&1, len))
+    |> Stream.drop(num)
+    |> Enum.at(0)
+
+    IO.puts("\nexperimental:\n")
+
+    signal
+    |> run(num, times)
   end
 end
