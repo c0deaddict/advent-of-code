@@ -151,7 +151,7 @@ defmodule AdventOfCode.Day17 do
     visited = MapSet.put(visited, pos)
 
     cond do
-      continue_stretch?(image, next_pos=move(pos, dir), visited) ->
+      continue_stretch?(image, next_pos = move(pos, dir), visited) ->
         # Go straight for as long as possible.
         # Increase distance of current stretch.
         [{^dir, steps} | rest] = path
@@ -169,7 +169,7 @@ defmodule AdventOfCode.Day17 do
         # Move over the intersection, increase steps by 2.
         {^dir, next_pos} = next
         [{^dir, steps} | rest] = path
-        path =[{dir, steps + 2} | rest]
+        path = [{dir, steps + 2} | rest]
         find_path(image, next_pos, dir, visited, path)
 
       true ->
@@ -187,6 +187,7 @@ defmodule AdventOfCode.Day17 do
 
   def draw_path(image, _, []), do: image
   def draw_path(image, pos, [{_, 0} | path]), do: draw_path(image, pos, path)
+
   def draw_path(image, pos, [{dir, steps} | path]) do
     image = Map.put(image, pos, :path)
     draw_path(image, move(pos, dir), [{dir, steps - 1} | path])
@@ -216,19 +217,163 @@ defmodule AdventOfCode.Day17 do
     maxy - miny + 3
   end
 
+  def find_repetitions(list, pattern) do
+    list
+    |> find_repetitions(pattern, length(pattern), 0, [])
+    |> Enum.reverse()
+  end
+
+  def find_repetitions([], _, _, _, acc), do: acc
+
+  def find_repetitions(list, pattern, len, offset, acc) do
+    case Enum.split(list, len) do
+      {^pattern, rest} ->
+        find_repetitions(rest, pattern, len, offset + len, [offset | acc])
+
+      _ ->
+        find_repetitions(tl(list), pattern, len, offset + 1, acc)
+    end
+  end
+
+  def sublists(list, min_len \\ 1, max_len \\ nil) do
+    len = length(list)
+    max_len = max_len || len
+
+    for j <- min_len..max_len, i <- 0..(len - j) do
+      Enum.slice(list, i, j)
+    end
+  end
+
+  def encode_pattern(pattern) do
+    pattern |> Enum.join(",")
+  end
+
+  def permutations([], _), do: [[]]
+  def permutations(_, 0), do: [[]]
+
+  def permutations(list, n) do
+    for elem <- list,
+        rest <- permutations(list -- [elem], n - 1) do
+      [elem | rest]
+    end
+  end
+
+  def permutations_in_order(list), do: permutations_in_order(list, length(list))
+
+  def permutations_in_order(_, 0), do: [[]]
+  def permutations_in_order([], _), do: []
+
+  def permutations_in_order([head | tail], n) do
+    for rest <- permutations_in_order(tail, n - 1) do
+      [head | rest]
+    end ++
+      permutations_in_order(tail, n)
+  end
+
+  def cover_all?(slices, len) do
+    {true, len - 1} ==
+      slices
+      |> Enum.sort_by(&elem(&1, 0))
+      |> Enum.reduce({true, 0}, fn {start, end_}, {res, prev} ->
+        {res and start == prev, end_}
+      end)
+  end
+
+  def cover_permutations(slices, pos, len)
+  def cover_permutations([], len, len), do: [[]]
+  def cover_permutations([], _, _), do: []
+
+  def cover_permutations([{pattern_idx, start, end_} | tail], pos, len) do
+    if start == pos do
+      # Take current slice and call recursively.
+      for rest <- cover_permutations(tail, end_, len),
+          do: [pattern_idx | rest]
+    else
+      []
+    end ++ cover_permutations(tail, pos, len)
+  end
+
+  def compress(list) do
+    sublists(list, 1, 10)
+    |> Stream.filter(fn pattern ->
+      String.length(encode_pattern(pattern)) <= 20
+    end)
+    |> Enum.map(fn pattern ->
+      {pattern, find_repetitions(list, pattern)}
+    end)
+    |> permutations_in_order(3)
+    |> Stream.map(fn patterns ->
+      slices =
+        patterns
+        |> Stream.with_index()
+        |> Stream.flat_map(fn {{pattern, slices}, pattern_idx} ->
+          len = length(pattern)
+          Enum.map(slices, &{pattern_idx, &1, &1 + len})
+        end)
+        |> Enum.sort_by(&elem(&1, 1))
+
+      patterns = patterns |> Enum.map(&elem(&1, 0))
+      {patterns, slices}
+    end)
+    |> Stream.filter(fn {patterns, slices} ->
+      length(slices) <= 10
+    end)
+    |> Stream.map(fn {patterns, slices} ->
+      slices
+      |> cover_permutations(0, length(list))
+      |> Enum.map(fn idxs -> {patterns, idxs} end)
+    end)
+    |> Stream.concat()
+    |> Enum.take(1)
+    |> hd
+  end
+
   def drive_robot(robot, image, pos, dir) do
+    # Idea: build up patterns while walking, at each step check if
+    # a previous pattern can be used. If so, apply it and branch.
+    # Also branch without applying it, and branch at each intersection
+    # for the possible routes.
     path = find_path(image, pos, dir, MapSet.new(), [{dir, 0}])
+
     draw_path(image, pos, path)
     |> draw_image_map
 
-    # TODO: convert dirs in path to turns (zip with path shifted)
-    # TODO: find repeating patterns?
+    {_, first_steps} = hd(path)
+
+    path =
+      path
+      |> Stream.zip(tl(path))
+      |> Enum.flat_map(fn {{from_dir, _}, {to_dir, steps}} ->
+        turn =
+          case {from_dir, to_dir} do
+            {:north, :east} -> "R"
+            {:east, :south} -> "R"
+            {:south, :west} -> "R"
+            {:west, :north} -> "R"
+            {:north, :west} -> "L"
+            {:west, :south} -> "L"
+            {:south, :east} -> "L"
+            {:east, :north} -> "L"
+          end
+
+        [turn, Integer.to_string(steps)]
+      end)
+
+    path =
+      if first_steps != 0 do
+        [Integer.to_string(first_steps) | path]
+      else
+        path
+      end
+
+    {[a, b, c], main} = compress(path)
+    main = Enum.map(main, &Enum.at(["A", "B", "C"], &1))
 
     robot
-    |> qa("Main:", "A,A,B,B,C,C,A,B,C")
-    |> qa("Function A:", "R,8,R,8")
-    |> qa("Function B:", "R,00000,R,4,R,8")
-    |> qa("Function C:", "L,6,L,2")
+    |> qa("Main:", encode_pattern(main))
+    |> qa("Function A:", encode_pattern(a))
+    |> qa("Function B:", encode_pattern(b))
+    |> qa("Function C:", encode_pattern(c))
     |> qa("Continuous video feed?", "n")
 
     robot
@@ -278,6 +423,10 @@ defmodule AdventOfCode.Day17 do
     |> gather_image()
     |> draw_image()
 
-    nil
+    receive do
+      {:output, _, score} -> score
+    after
+      3_000 -> nil
+    end
   end
 end
