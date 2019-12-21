@@ -30,4 +30,12 @@ defmodule AdventOfCode.Utils do
     |> Stream.take(times)
     |> Stream.concat()
   end
+
+  def upcase?(str), do: String.upcase(str) == str
+
+  def find_key(map, value) do
+    Enum.find_value(map, fn {key, val} ->
+      if val == value, do: key
+    end)
+  end
 end
