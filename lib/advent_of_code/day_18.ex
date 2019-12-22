@@ -45,56 +45,106 @@ defmodule AdventOfCode.Day18 do
     ]
   end
 
+  def key2door({:key, key}), do: {:door, String.upcase(key)}
+
+  def is_key?({:key, _}), do: true
+  def is_key?(_), do: false
+
+  def is_door?({:door, _}), do: true
+  def is_door?(_), do: false
+
   @doc """
   Scan for keys and doors that can be reached
   """
-  def scan(map, pos, visited \\ MapSet.new(), steps \\ 0) do
-    visited = MapSet.put(visited, pos)
-
-    case Map.get(map, pos) do
-      {type, name} ->
-        [{type, name, pos, steps}]
-
-      _ ->
-        neighbors(pos)
-        |> Enum.reject(&(Map.get(map, &1) == :wall))
-        |> Enum.reject(&MapSet.member?(visited, &1))
-        |> Enum.map(&scan(map, &1, visited, steps + 1))
-        |> Enum.concat()
-    end
+  def scan(map, from) do
+    frontier = [from]
+    visited = MapSet.new([from])
+    scan(map, frontier, visited, 0, [])
   end
 
-  def shortest_path(map, pos, steps \\ 0, path \\ []) do
-    {keys, doors} =
-      scan(map, pos)
-      |> Enum.split_with(&(elem(&1, 0) == :key))
+  def scan(_, [], _, _, edges), do: Map.new(edges)
 
-    case {keys, doors} do
-      {[], []} ->
-        IO.inspect({path, steps})
-        steps
+  def scan(map, frontier, visited, steps, edges) do
+    frontier =
+      frontier
+      |> Stream.map(&neighbors/1)
+      |> Stream.concat()
+      |> Stream.uniq()
+      |> Stream.reject(&(Map.get(map, &1) == :wall))
+      |> Stream.reject(&MapSet.member?(visited, &1))
+      |> Enum.to_list()
 
-      {[], _} ->
-        raise "locked in, doors left but no keys"
+    visited =
+      frontier
+      |> MapSet.new()
+      |> MapSet.union(visited)
 
-      _ ->
-        # Branch taking a key, and unlocking the door.
-        keys
-        |> Enum.map(fn {:key, key, pos, steps_to_key} ->
-          map = Map.put(map, pos, :empty)
-          door_pos = find_key(map, {:door, String.upcase(key)})
+    {hits, frontier} =
+      frontier
+      |> Enum.split_with(&(Map.get(map, &1) != :empty))
 
-          map =
-          if door_pos != nil do
-            Map.put(map, door_pos, :empty)
-          else
-            map
-          end
+    steps = steps + 1
 
-          shortest_path(map, pos, steps + steps_to_key, [key | path])
-        end)
-        |> Enum.min()
-    end
+    edges =
+      hits
+      |> Enum.map(&{Map.get(map, &1), steps})
+      |> Enum.reduce(edges, &[&1 | &2])
+
+    scan(map, frontier, visited, steps, edges)
+  end
+
+  def remove_vertex(graph, v) do
+    remove_edges = Map.get(graph, v)
+
+    graph
+    |> Map.delete(v)
+    |> Enum.map(fn {from, edges} ->
+      new_edges =
+        case Map.get(edges, v) do
+          nil ->
+            edges
+
+          steps ->
+            # Sorting descending on steps will resolve any conflicts in edges.
+            # Map.new only includes the value of the _last_ {key, value} pair.
+            remove_edges
+            |> Map.delete(from)
+            |> Enum.map(fn {to, v_steps} -> {to, steps + v_steps} end)
+            |> Enum.concat(Map.delete(edges, v))
+            |> Enum.sort_by(&elem(&1, 1), &>=/2)
+            |> Map.new()
+        end
+
+      {from, new_edges}
+    end)
+    |> Map.new()
+  end
+
+  def shortest_path(graph) do
+    keys_left =
+      graph
+      |> Map.keys()
+      |> Enum.filter(&is_key?/1)
+
+    shortest_path(graph, :entrance, keys_left, 0)
+  end
+
+  def shortest_path(_, _, [], steps), do: steps
+
+  def shortest_path(graph, v, keys_left, steps) do
+    v_edges = Map.get(graph, v)
+    graph = remove_vertex(graph, v)
+
+    v_edges
+    |> Enum.filter(fn {to, _} -> Enum.member?(keys_left, to) end)
+    |> Enum.map(fn {key, steps_to_key} ->
+      door = key2door(key)
+      # Unlock door by removing it.
+      graph = remove_vertex(graph, door)
+      keys_left = keys_left -- [key]
+      shortest_path(graph, key, keys_left, steps + steps_to_key)
+    end)
+    |> Enum.min()
   end
 
   def draw_map(map) do
@@ -119,10 +169,29 @@ defmodule AdventOfCode.Day18 do
     end
   end
 
+  def filter_vertices(map) do
+    map
+    |> Enum.filter(fn
+      {_, :entrance} -> true
+      {_, {:key, _}} -> true
+      {_, {:door, _}} -> true
+      _ -> false
+    end)
+  end
+
   def part1(input) do
     map = parse(input)
-    entrance = find_key(map, :entrance)
-    shortest_path(map, entrance)
+
+    vertices =
+      map
+      |> filter_vertices()
+
+    graph =
+      vertices
+      |> Enum.map(fn {pos, v} -> {v, scan(map, pos)} end)
+      |> Map.new()
+
+    shortest_path(graph)
   end
 
   def part2(args) do
