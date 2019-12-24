@@ -37,6 +37,7 @@ defmodule AdventOfCode.Day18Test do
     assert part1(input) == 132
   end
 
+  @tag :skip
   test "part 1 example 4" do
     input = """
     #################
@@ -53,6 +54,7 @@ defmodule AdventOfCode.Day18Test do
     assert part1(input) == 136
   end
 
+  @tag :skip
   test "part 1 example 5" do
     input = """
     ########################

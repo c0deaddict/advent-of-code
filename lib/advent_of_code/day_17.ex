@@ -315,7 +315,7 @@ defmodule AdventOfCode.Day17 do
       patterns = patterns |> Enum.map(&elem(&1, 0))
       {patterns, slices}
     end)
-    |> Stream.filter(fn {patterns, slices} ->
+    |> Stream.filter(fn {_, slices} ->
       length(slices) <= 10
     end)
     |> Stream.map(fn {patterns, slices} ->

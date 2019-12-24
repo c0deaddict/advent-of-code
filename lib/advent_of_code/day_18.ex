@@ -36,15 +36,6 @@ defmodule AdventOfCode.Day18 do
     |> Map.new()
   end
 
-  def neighbors({x, y}) do
-    [
-      {x, y - 1},
-      {x, y + 1},
-      {x - 1, y},
-      {x + 1, y}
-    ]
-  end
-
   def key2door({:key, key}), do: {:door, String.upcase(key)}
 
   def is_key?({:key, _}), do: true

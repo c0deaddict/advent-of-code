@@ -2,20 +2,19 @@ defmodule AdventOfCode.Day19Test do
   use ExUnit.Case
 
   import AdventOfCode.Day19
+  alias AdventOfCode.Day05, as: IntCode
 
-  @tag :skip
-  test "part1" do
-    input = nil
-    result = part1(input)
+  test "scan_stream" do
+    input = File.read!("./input/day_19.txt")
 
-    assert result
-  end
+    result =
+      input
+      |> IntCode.parse()
+      |> scan_stream()
+      |> Stream.take(50)
+      |> image_from_stream()
+      |> Enum.count(fn {{x, _}, value} -> x < 50 and value == 1 end)
 
-  @tag :skip
-  test "part2" do
-    input = nil
-    result = part2(input)
-
-    assert result
+    assert part1(input) == result
   end
 end

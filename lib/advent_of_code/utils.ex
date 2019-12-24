@@ -38,4 +38,20 @@ defmodule AdventOfCode.Utils do
       if val == value, do: key
     end)
   end
+
+  def is_letter?(ch) do
+    ch >= "A" and ch <= "Z"
+  end
+
+  def neighbors({x, y}) do
+    [
+      {x, y - 1},
+      {x, y + 1},
+      {x - 1, y},
+      {x + 1, y}
+    ]
+  end
+
+  def inc(i), do: i + 1
+  def dec(i), do: i - 1
 end
