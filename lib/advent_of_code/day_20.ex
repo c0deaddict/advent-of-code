@@ -19,7 +19,7 @@ defmodule AdventOfCode.Day20 do
   end
 
   @doc """
-  Scan for all reachable paths from vertex v.
+  Scan for all reachable paths from vertex positioned at from.
   """
   def scan(map, vertices, from) do
     frontier = [from]
@@ -58,36 +58,64 @@ defmodule AdventOfCode.Day20 do
     scan(map, vertices, frontier, visited, steps, edges)
   end
 
-  def find_vertex(map, {x, y}, ch, {dx, dy}) do
+  def is_inner?({x, y}, {{minx, miny}, {maxx, maxy}}) do
+    cond do
+      x == minx || x == maxx -> false
+      y == miny || y == maxy -> false
+      true -> true
+    end
+  end
+
+  def find_vertex(map, {x, y}, level, ch, {dx, dy}) do
     next_ch = Map.get(map, {x + dx, y + dy})
     entrance = {x + dx + dx, y + dy + dy}
 
     if is_letter?(next_ch) and Map.get(map, entrance) == "." do
-      v = if dx < 0 || dy < 0, do: next_ch <> ch, else: ch <> next_ch
-      [{entrance, v}]
+      name = if dx < 0 || dy < 0, do: next_ch <> ch, else: ch <> next_ch
+      [{entrance, {name, level}}]
     else
       []
     end
   end
 
   def find_vertices(map) do
+    dim = map_dimensions(map)
+
     map
     |> Stream.filter(fn {_, ch} -> is_letter?(ch) end)
     |> Enum.flat_map(fn {pos, ch} ->
+      level = if is_inner?(pos, dim), do: 1, else: 0
+
       [{1, 0}, {-1, 0}, {0, 1}, {0, -1}]
-      |> Enum.flat_map(&find_vertex(map, pos, ch, &1))
+      |> Enum.flat_map(&find_vertex(map, pos, level, ch, &1))
     end)
     |> Map.new()
   end
 
-  def to_graph(map) do
-    vertices = find_vertices(map)
-
+  def scan_edges(vertices, map) do
     vertices
     |> Enum.map(fn {pos, v} ->
       {v, scan(map, vertices, pos)}
     end)
-    |> Enum.reduce(Graph.new(), fn {from, edges}, acc ->
+  end
+
+  def update_levels(nbh, fun) do
+    Enum.map(nbh, fn {v1, edges} ->
+      edges =
+        Enum.map(edges, fn {v2, weight} ->
+          {fun.(v2), weight}
+        end)
+
+      {fun.(v1), edges}
+    end)
+  end
+
+  def drop_levels(nbh) do
+    update_levels(nbh, fn {name, _} -> name end)
+  end
+
+  def to_graph(nbh) do
+    Enum.reduce(nbh, Graph.new(), fn {from, edges}, acc ->
       Enum.reduce(edges, acc, fn {to, weight}, acc ->
         Graph.add_edge(acc, Edge.new(from, to, weight: weight))
       end)
@@ -106,20 +134,39 @@ defmodule AdventOfCode.Day20 do
     |> dec()
   end
 
-  def shortest_path(graph) do
-    Graph.dijkstra(graph, "AA", "ZZ")
-  end
-
   def part1(input) do
+    map = parse(input)
+
     graph =
-      input
-      |> parse()
+      map
+      |> find_vertices()
+      |> scan_edges(map)
+      |> drop_levels()
       |> to_graph()
 
-    shortest_path(graph)
+    Graph.dijkstra(graph, "AA", "ZZ")
     |> path_weight(graph)
   end
 
   def part2(input) do
+    map = parse(input)
+
+    nbh =
+      map
+      |> find_vertices()
+      |> scan_edges(map)
+
+    graph =
+      0..30
+      |> Enum.map(fn i ->
+        update_levels(nbh, fn {name, level} ->
+          {name, level + i}
+        end)
+      end)
+      |> Enum.concat()
+      |> to_graph()
+
+    Graph.dijkstra(graph, {"AA", 0}, {"ZZ", 0})
+    |> path_weight(graph)
   end
 end

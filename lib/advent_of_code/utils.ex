@@ -54,4 +54,13 @@ defmodule AdventOfCode.Utils do
 
   def inc(i), do: i + 1
   def dec(i), do: i - 1
+
+  def map_dimensions(map) do
+    keys = Map.keys(map)
+
+    {{minx, _}, {maxx, _}} = Enum.min_max_by(keys, &elem(&1, 0))
+    {{_, miny}, {_, maxy}} = Enum.min_max_by(keys, &elem(&1, 1))
+
+    {{minx, miny}, {maxx, maxy}}
+  end
 end

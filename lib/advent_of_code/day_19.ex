@@ -1,4 +1,5 @@
 defmodule AdventOfCode.Day19 do
+  import AdventOfCode.Utils
   alias AdventOfCode.Day05, as: IntCode
 
   def scan(program, x, y) do
@@ -12,10 +13,7 @@ defmodule AdventOfCode.Day19 do
   end
 
   def draw_image(image) do
-    keys = Map.keys(image)
-
-    {{minx, _}, {maxx, _}} = Enum.min_max_by(keys, &elem(&1, 0))
-    {{_, miny}, {_, maxy}} = Enum.min_max_by(keys, &elem(&1, 1))
+    {{minx, miny}, {maxx, maxy}} = map_dimensions(image)
 
     for y <- miny..maxy do
       line =

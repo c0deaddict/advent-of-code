@@ -1,4 +1,5 @@
 defmodule AdventOfCode.Day15 do
+  import AdventOfCode.Utils
   alias AdventOfCode.Day05, as: IntCode
 
   defmodule State do
@@ -42,7 +43,7 @@ defmodule AdventOfCode.Day15 do
   @doc """
   Find all unexplored positions that are reachable.
   """
-  def unexplored(image, pos = {x, y}, seen \\ MapSet.new()) do
+  def unexplored(image, pos, seen \\ MapSet.new()) do
     seen = MapSet.put(seen, pos)
 
     neighbours(pos)
@@ -123,10 +124,7 @@ defmodule AdventOfCode.Day15 do
   end
 
   def draw_image(image) do
-    keys = Map.keys(image)
-
-    {{minx, _}, {maxx, _}} = Enum.min_max_by(keys, &elem(&1, 0))
-    {{_, miny}, {_, maxy}} = Enum.min_max_by(keys, &elem(&1, 1))
+    {{minx, miny}, {maxx, maxy}} = map_dimensions(image)
 
     IO.puts(String.duplicate("-", maxx - minx + 3))
 
@@ -166,7 +164,7 @@ defmodule AdventOfCode.Day15 do
     end
 
     # edge cost is constant.
-    dist = fn a, b -> 1 end
+    dist = fn _, _ -> 1 end
 
     # estimated cost = manhattan distance.
     h = fn {ax, ay}, {bx, by} ->

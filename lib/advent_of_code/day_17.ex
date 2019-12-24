@@ -1,4 +1,5 @@
 defmodule AdventOfCode.Day17 do
+  import AdventOfCode.Utils
   alias AdventOfCode.Day05, as: IntCode
 
   def gather_image(robot, lines \\ "") do
@@ -46,7 +47,7 @@ defmodule AdventOfCode.Day17 do
     end)
   end
 
-  def neighbors({x, y}) do
+  def neighbors_dirs({x, y}) do
     [
       {:north, {x, y - 1}},
       {:south, {x, y + 1}},
@@ -59,7 +60,7 @@ defmodule AdventOfCode.Day17 do
     image
     |> Stream.map(fn {pos, _} -> pos end)
     |> Enum.filter(fn pos ->
-      neighbors(pos)
+      neighbors_dirs(pos)
       |> Stream.map(&elem(&1, 1))
       |> Enum.all?(&Map.has_key?(image, &1))
     end)
@@ -130,7 +131,7 @@ defmodule AdventOfCode.Day17 do
   end
 
   def first_new_neighbor(image, pos, visited) do
-    neighbors(pos)
+    neighbors_dirs(pos)
     |> Enum.find(fn {_, pos} ->
       Map.has_key?(image, pos) and
         not MapSet.member?(visited, pos)
@@ -138,7 +139,7 @@ defmodule AdventOfCode.Day17 do
   end
 
   def move_across_intersection(image, pos, visited) do
-    neighbors(pos)
+    neighbors_dirs(pos)
     |> Enum.filter(fn {_, pos} -> Map.has_key?(image, pos) end)
     |> Enum.map(fn {dir, pos} -> {dir, move(pos, dir)} end)
     |> Enum.find(fn {_, pos} ->
@@ -194,10 +195,7 @@ defmodule AdventOfCode.Day17 do
   end
 
   def draw_image_map(image) do
-    keys = Map.keys(image)
-
-    {{minx, _}, {maxx, _}} = Enum.min_max_by(keys, &elem(&1, 0))
-    {{_, miny}, {_, maxy}} = Enum.min_max_by(keys, &elem(&1, 1))
+    {{minx, miny}, {maxx, maxy}} = map_dimensions(image)
 
     for y <- miny..maxy do
       line =

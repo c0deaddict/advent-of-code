@@ -139,10 +139,7 @@ defmodule AdventOfCode.Day18 do
   end
 
   def draw_map(map) do
-    keys = Map.keys(map)
-
-    {{minx, _}, {maxx, _}} = Enum.min_max_by(keys, &elem(&1, 0))
-    {{_, miny}, {_, maxy}} = Enum.min_max_by(keys, &elem(&1, 1))
+    {{minx, miny}, {maxx, maxy}} = map_dimensions(map)
 
     for y <- miny..maxy do
       line =

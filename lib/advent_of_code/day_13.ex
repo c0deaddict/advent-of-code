@@ -1,4 +1,5 @@
 defmodule AdventOfCode.Day13 do
+  import AdventOfCode.Utils
   alias AdventOfCode.Day05, as: IntCode
 
   defmodule State do
@@ -18,12 +19,6 @@ defmodule AdventOfCode.Day13 do
       {:output, _, x} -> x
       {:halt, _, _} -> raise "expected output, got halt"
     end
-  end
-
-  def find_key(map, value) do
-    map
-    |> Enum.find(fn {_, val} -> val == value end)
-    |> elem(0)
   end
 
   @doc """
@@ -141,10 +136,7 @@ defmodule AdventOfCode.Day13 do
   end
 
   def draw_image(image) do
-    keys = Map.keys(image)
-
-    {{minx, _}, {maxx, _}} = Enum.min_max_by(keys, &elem(&1, 0))
-    {{_, miny}, {_, maxy}} = Enum.min_max_by(keys, &elem(&1, 1))
+    {{minx, miny}, {maxx, maxy}} = map_dimensions(image)
 
     for y <- miny..maxy do
       minx..maxx
