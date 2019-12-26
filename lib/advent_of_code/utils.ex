@@ -63,4 +63,27 @@ defmodule AdventOfCode.Utils do
 
     {{minx, miny}, {maxx, maxy}}
   end
+
+  def permutations(list), do: permutations(list, length(list))
+
+  def permutations([], _), do: [[]]
+  def permutations(_, 0), do: [[]]
+
+  def permutations(list, n) do
+    for elem <- list,
+        rest <- permutations(list -- [elem], n - 1) do
+      [elem | rest]
+    end
+  end
+
+  def combinations(_, 0), do: [[]]
+
+  def combinations(list, n) do
+    for elem <- list,
+        rest <- combinations(list, n - 1) do
+      [elem | rest]
+    end
+  end
+
+  def chr(i), do: List.to_string([i])
 end

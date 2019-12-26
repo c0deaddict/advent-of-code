@@ -88,6 +88,8 @@ defmodule AdventOfCode.Day17 do
     (line <> "\n")
     |> String.to_charlist()
     |> Enum.each(&send(robot, {:input, &1}))
+
+    robot
   end
 
   def read_line(result \\ []) do
@@ -103,15 +105,22 @@ defmodule AdventOfCode.Day17 do
     end
   end
 
-  def qa(robot, question, answer) do
+  def expect_line(line) do
     case read_line() do
-      ^question -> IO.puts("Q: #{question}")
+      ^line -> :ok
       "" -> raise read_line()
       err -> raise err
     end
+  end
 
-    IO.puts("A: #{answer}")
-    send_line(robot, answer)
+  def qa(robot, question, answers) do
+    :ok = expect_line(question)
+    IO.puts("Q: #{question}")
+
+    Enum.each(answers, fn a ->
+      IO.puts("A: #{a}")
+      send_line(robot, a)
+    end)
 
     # For chaining.
     robot
@@ -246,16 +255,6 @@ defmodule AdventOfCode.Day17 do
     pattern |> Enum.join(",")
   end
 
-  def permutations([], _), do: [[]]
-  def permutations(_, 0), do: [[]]
-
-  def permutations(list, n) do
-    for elem <- list,
-        rest <- permutations(list -- [elem], n - 1) do
-      [elem | rest]
-    end
-  end
-
   def permutations_in_order(list), do: permutations_in_order(list, length(list))
 
   def permutations_in_order(_, 0), do: [[]]
@@ -368,11 +367,11 @@ defmodule AdventOfCode.Day17 do
     main = Enum.map(main, &Enum.at(["A", "B", "C"], &1))
 
     robot
-    |> qa("Main:", encode_pattern(main))
-    |> qa("Function A:", encode_pattern(a))
-    |> qa("Function B:", encode_pattern(b))
-    |> qa("Function C:", encode_pattern(c))
-    |> qa("Continuous video feed?", "n")
+    |> qa("Main:", [encode_pattern(main)])
+    |> qa("Function A:", [encode_pattern(a)])
+    |> qa("Function B:", [encode_pattern(b)])
+    |> qa("Function C:", [encode_pattern(c)])
+    |> qa("Continuous video feed?", ["n"])
 
     robot
   end
