@@ -12,7 +12,9 @@ struct PasswordEntry {
     password: String,
 }
 
-fn parse_input(input: &str) -> Vec<PasswordEntry> {
+type Input = Vec<PasswordEntry>;
+
+fn parse_input(input: &str) -> Input {
     let re = Regex::new(r"^(\d+)-(\d+) ([a-z]): ([a-z]+)$").unwrap();
 
     input
@@ -26,7 +28,7 @@ fn parse_input(input: &str) -> Vec<PasswordEntry> {
             ch: c[3].chars().next().unwrap(),
             password: c[4].to_owned(),
         })
-        .collect::<Vec<PasswordEntry>>()
+        .collect()
 }
 
 fn frequencies(s: &str) -> HashMap<char, usize> {
@@ -44,7 +46,7 @@ fn is_valid_part1(entry: &PasswordEntry) -> bool {
     reps >= entry.i && reps <= entry.j
 }
 
-fn part_01(input: &Vec<PasswordEntry>) -> usize {
+fn part_01(input: &Input) -> usize {
     input.iter().filter(|e| is_valid_part1(e)).count()
 }
 
@@ -55,7 +57,7 @@ fn is_valid_part2(entry: &PasswordEntry) -> bool {
     (a || b) && !(a && b)
 }
 
-fn part_02(input: &Vec<PasswordEntry>) -> usize {
+fn part_02(input: &Input) -> usize {
     input.iter().filter(|e| is_valid_part2(e)).count()
 }
 
@@ -63,9 +65,9 @@ fn main() {
     run(
         1,
         include_str!("input.txt"),
-        &parse_input,
-        &part_01,
-        &part_02,
+        parse_input,
+        part_01,
+        part_02,
     )
 }
 

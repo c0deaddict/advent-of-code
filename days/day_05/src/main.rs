@@ -1,14 +1,13 @@
 use lib::run;
 use std::collections::HashSet;
 
-type Input = Vec<String>;
+type Input<'r> = Vec<&'r str>;
 
-fn parse_input(input: &str) -> Input {
+fn parse_input<'r>(input: &'r str) -> Input<'r> {
     input
         .lines()
         .map(|l| l.trim())
         .filter(|l| !l.is_empty())
-        .map(|l| l.to_owned())
         .collect()
 }
 
@@ -39,9 +38,9 @@ fn main() {
     run(
         1,
         include_str!("input.txt"),
-        &parse_input,
-        &part_01,
-        &part_02,
+        parse_input,
+        part_01,
+        part_02,
     )
 }
 

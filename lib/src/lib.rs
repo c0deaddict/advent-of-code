@@ -2,15 +2,15 @@ use clap::{App, Arg};
 use std::fmt::Debug;
 use std::time::Instant;
 
-type ParseInput<I> = dyn Fn(&str) -> I;
-type Part<I, T> = dyn Fn(&I) -> T;
+type ParseInput<'r, I> = fn(&'r str) -> I;
+type Part<I, T> = fn(&I) -> T;
 
-pub fn run<I, T1: Debug, T2: Debug>(
+pub fn run<'r, I, T1: Debug, T2: Debug>(
     num: u32,
-    input: &str,
-    parse_input: &ParseInput<I>,
-    part_01: &Part<I, T1>,
-    part_02: &Part<I, T2>,
+    input: &'r str,
+    parse_input: ParseInput<'r, I>,
+    part_01: Part<I, T1>,
+    part_02: Part<I, T2>,
 ) {
     let matches = App::new(format!("AOC 2020 day {}", num))
         .author("Jos van Bakel")

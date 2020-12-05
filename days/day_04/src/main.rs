@@ -6,10 +6,10 @@ use std::collections::HashMap;
 #[macro_use]
 extern crate lazy_static;
 
-type Passport = HashMap<String, String>;
-type Input = Vec<Passport>;
+type Passport<'r> = HashMap<&'r str, &'r str>;
+type Input<'r> = Vec<Passport<'r>>;
 
-fn parse_input(input: &str) -> Input {
+fn parse_input<'r>(input: &'r str) -> Input<'r> {
     input
         .trim()
         .split("\n\n")
@@ -18,7 +18,6 @@ fn parse_input(input: &str) -> Input {
                 .split_whitespace()
                 .map(|kv| {
                     kv.splitn(2, ":")
-                        .map(|s| s.to_owned())
                         .collect_tuple()
                         .unwrap()
                 })
@@ -30,7 +29,7 @@ fn parse_input(input: &str) -> Input {
 fn has_required_fields(passport: &Passport) -> bool {
     vec!["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
         .iter()
-        .map(|f| passport.get(f.to_owned()))
+        .map(|f| passport.get(f))
         .all(|v| v.is_some())
 }
 
@@ -90,7 +89,7 @@ fn validate_passport_id(s: &str) -> bool {
 }
 
 fn validate_fields(passport: &Passport) -> bool {
-    passport.iter().all(|(k, v)| match &k[..] {
+    passport.iter().all(|(k, v)| match *k {
         "byr" => validate_birth_year(v),
         "iyr" => validate_issue_year(v),
         "eyr" => validate_expiration_year(v),
@@ -114,9 +113,9 @@ fn main() {
     run(
         1,
         include_str!("input.txt"),
-        &parse_input,
-        &part_01,
-        &part_02,
+        parse_input,
+        part_01,
+        part_02,
     )
 }
 
@@ -144,9 +143,9 @@ mod tests {
         let input = parse_input(EXAMPLE_DATA_1);
         assert_eq!(input.len(), 4);
         assert_eq!(input[0].len(), 8);
-        assert_eq!(input[0].get("iyr").unwrap(), "2017");
+        assert_eq!(input[0].get("iyr").unwrap(), &"2017");
         assert_eq!(input[3].len(), 6);
-        assert_eq!(input[3].get("hgt").unwrap(), "59in");
+        assert_eq!(input[3].get("hgt").unwrap(), &"59in");
     }
 
     #[test]

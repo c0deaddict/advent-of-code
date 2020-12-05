@@ -39,9 +39,9 @@ fn main() {
     run(
         1,
         include_str!("input.txt"),
-        &parse_input,
-        &part_01,
-        &part_02,
+        parse_input,
+        part_01,
+        part_02,
     )
 }
 
