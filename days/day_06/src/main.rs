@@ -1,5 +1,6 @@
 use lib::run;
 use std::collections::HashSet;
+use rayon::prelude::*;
 
 type Input = Vec<Vec<HashSet<char>>>;
 
@@ -27,7 +28,7 @@ fn part_01(input: &Input) -> usize {
 
 fn part_02(input: &Input) -> usize {
     input
-        .iter()
+        .par_iter()
         .map(|g| {
             // NOTE: Nightly has a method `fold_first` on iter, which does
             // exactly what we want here.
