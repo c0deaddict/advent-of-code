@@ -3,7 +3,7 @@ use std::collections::HashSet;
 
 type Input<'r> = Vec<&'r str>;
 
-fn parse_input<'r>(input: &'r str) -> Input<'r> {
+fn parse_input(input: &str) -> Input {
     input
         .lines()
         .map(|l| l.trim())
@@ -35,13 +35,7 @@ fn part_02(input: &Input) -> usize {
 }
 
 fn main() {
-    run(
-        1,
-        include_str!("input.txt"),
-        parse_input,
-        part_01,
-        part_02,
-    )
+    run(1, include_str!("input.txt"), parse_input, part_01, part_02)
 }
 
 #[cfg(test)]

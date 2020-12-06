@@ -62,13 +62,7 @@ fn part_02(input: &Input) -> usize {
 }
 
 fn main() {
-    run(
-        1,
-        include_str!("input.txt"),
-        parse_input,
-        part_01,
-        part_02,
-    )
+    run(1, include_str!("input.txt"), parse_input, part_01, part_02)
 }
 
 #[cfg(test)]

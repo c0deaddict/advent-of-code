@@ -9,18 +9,14 @@ extern crate lazy_static;
 type Passport<'r> = HashMap<&'r str, &'r str>;
 type Input<'r> = Vec<Passport<'r>>;
 
-fn parse_input<'r>(input: &'r str) -> Input<'r> {
+fn parse_input(input: &str) -> Input {
     input
         .trim()
         .split("\n\n")
         .map(|p| {
             p.trim()
                 .split_whitespace()
-                .map(|kv| {
-                    kv.splitn(2, ":")
-                        .collect_tuple()
-                        .unwrap()
-                })
+                .map(|kv| kv.splitn(2, ':').collect_tuple().unwrap())
                 .collect()
         })
         .collect()
@@ -44,10 +40,7 @@ lazy_static! {
 }
 
 fn validate_number(s: &str, min: i32, max: i32) -> bool {
-    match s.parse::<i32>() {
-        Ok(i) if i >= min && i <= max => true,
-        _ => false,
-    }
+    matches!(s.parse::<i32>(), Ok(i) if i >= min && i <= max)
 }
 
 fn validate_birth_year(s: &str) -> bool {
@@ -110,13 +103,7 @@ fn part_02(input: &Input) -> usize {
 }
 
 fn main() {
-    run(
-        1,
-        include_str!("input.txt"),
-        parse_input,
-        part_01,
-        part_02,
-    )
+    run(1, include_str!("input.txt"), parse_input, part_01, part_02)
 }
 
 #[cfg(test)]
