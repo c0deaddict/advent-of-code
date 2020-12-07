@@ -1,6 +1,6 @@
 use lib::run;
-use std::collections::HashSet;
 use rayon::prelude::*;
+use std::collections::HashSet;
 
 type Input = Vec<Vec<HashSet<char>>>;
 
