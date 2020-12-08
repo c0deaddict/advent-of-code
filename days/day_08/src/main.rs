@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use lib::run;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 enum Instr {
     Acc(i32),
@@ -32,7 +32,7 @@ fn part_01(input: &Input) -> i32 {
     let mut acc: i32 = 0;
     let mut pc: i32 = 0;
     let mut visited = HashSet::new();
-    while true {
+    loop {
         if !visited.insert(pc) {
             break;
         }
@@ -52,13 +52,13 @@ fn part_02(input: &Input) -> i32 {
     let jumps = input
         .iter()
         .enumerate()
-        .filter(|(i, instr)| matches!(instr, Instr::Jmp(_)));
+        .filter(|(_, instr)| matches!(instr, Instr::Jmp(_)));
 
     'outer: for (i, _) in jumps {
         let mut acc: i32 = 0;
         let mut pc: i32 = 0;
         let mut visited = HashSet::new();
-        while true {
+        loop {
             if pc == input.len() as i32 {
                 return acc;
             } else if !visited.insert(pc) {
