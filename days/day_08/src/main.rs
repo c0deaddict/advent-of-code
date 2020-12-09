@@ -5,7 +5,7 @@ use std::collections::HashSet;
 enum Instr {
     Acc(i32),
     Jmp(i32),
-    Nop,
+    Nop(i32),
 }
 
 type Input = Vec<Instr>;
@@ -21,7 +21,7 @@ fn parse_input(input: &str) -> Input {
             match op {
                 "acc" => Instr::Acc(val),
                 "jmp" => Instr::Jmp(val),
-                "nop" => Instr::Nop,
+                "nop" => Instr::Nop(val),
                 _ => panic!("unknown instruction {}", op),
             }
         })
@@ -42,19 +42,20 @@ fn part_01(input: &Input) -> i32 {
                 pc += 1;
             }
             Instr::Jmp(i) => pc += i,
-            Instr::Nop => pc += 1,
+            Instr::Nop(_) => pc += 1,
         }
     }
     acc
 }
 
 fn part_02(input: &Input) -> i32 {
-    let jumps = input
-        .iter()
-        .enumerate()
-        .filter(|(_, instr)| matches!(instr, Instr::Jmp(_)));
+    let jumps_and_nops = input.iter().enumerate().filter(|(_, instr)| match instr {
+        Instr::Jmp(_) => true,
+        Instr::Nop(_) => true,
+        _ => false,
+    });
 
-    'outer: for (i, _) in jumps {
+    'outer: for (change_pc, _) in jumps_and_nops {
         let mut acc: i32 = 0;
         let mut pc: i32 = 0;
         let mut visited = HashSet::new();
@@ -64,19 +65,28 @@ fn part_02(input: &Input) -> i32 {
             } else if !visited.insert(pc) {
                 continue 'outer;
             }
-            let instr = if pc == i as i32 {
-                &Instr::Nop
-            } else {
-                &input[pc as usize]
-            };
-            match instr {
-                Instr::Acc(i) => {
-                    acc += i;
-                    pc += 1;
+
+            let instr = &input[pc as usize];
+            // Reverse Jmp and Nop instructions.
+            if pc == change_pc as i32 {
+                match instr {
+                    Instr::Acc(i) => {
+                        acc += i;
+                        pc += 1;
+                    }
+                    Instr::Nop(i) => pc += i,
+                    Instr::Jmp(_) => pc += 1,
                 }
-                Instr::Jmp(i) => pc += i,
-                Instr::Nop => pc += 1,
-            }
+            } else {
+                match instr {
+                    Instr::Acc(i) => {
+                        acc += i;
+                        pc += 1;
+                    }
+                    Instr::Jmp(i) => pc += i,
+                    Instr::Nop(_) => pc += 1,
+                }
+            };
         }
     }
 
