@@ -4,18 +4,19 @@ use std::fmt::Debug;
 #[derive(Debug)]
 struct Input {
     earliest_ts: usize,
-    busses: Vec<Option<usize>>,
+    busses: Vec<(usize, usize)>,
 }
 
 fn parse_busses(line: &str) -> Input {
     let busses = line
         .trim()
         .split(',')
-        .map(|id| {
+        .enumerate()
+        .filter_map(|(pos, id)| {
             if id == "x" {
                 None
             } else {
-                Some(id.parse::<usize>().unwrap())
+                Some((pos, id.parse::<usize>().unwrap()))
             }
         })
         .collect();
@@ -39,11 +40,9 @@ fn parse_input(input: &str) -> Input {
 fn part1(input: &Input) -> usize {
     for i in 0.. {
         let ts = input.earliest_ts + i;
-        for bus in input.busses.iter() {
-            if let Some(bus) = bus {
-                if ts % bus == 0 {
-                    return i * bus;
-                }
+        for (_, bus) in input.busses.iter() {
+            if ts % bus == 0 {
+                return i * bus;
             }
         }
     }
@@ -55,21 +54,17 @@ fn part2(input: &Input) -> usize {
     let (offset, max_step) = input
         .busses
         .iter()
-        .enumerate()
         .max_by(|(_, a), (_, b)| a.cmp(b))
         .unwrap();
 
-    let max_step = max_step.unwrap();
-
-    'outer: for i in (max_step..).step_by(max_step) {
+    let start = *max_step;
+    'outer: for i in (start..).step_by(*max_step) {
         if i % 10000000 == 0 {
             println!("{}", i);
         }
-        for (j, bus) in input.busses.iter().enumerate() {
-            if let Some(bus) = bus {
-                if (i + j - offset) % bus != 0 {
-                    continue 'outer;
-                }
+        for (j, bus) in input.busses.iter() {
+            if (i + j - offset) % bus != 0 {
+                continue 'outer;
             }
         }
         return i - offset;
