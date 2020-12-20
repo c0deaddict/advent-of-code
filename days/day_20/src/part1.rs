@@ -1,5 +1,5 @@
-use crate::types::*;
 use crate::input::*;
+use crate::types::*;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
@@ -52,10 +52,10 @@ fn search<'a>(
     let y = i / size;
     let x = i % size;
 
-    let h = if x > 0 { hadj.get(puzzle[i - 1]) } else { None };
+    let h = if x > 0 { vadj.get(puzzle[i - 1]) } else { None };
 
     let v = if y > 0 {
-        vadj.get(puzzle[x + (y - 1) * size])
+        hadj.get(puzzle[x + (y - 1) * size])
     } else {
         None
     };
@@ -110,11 +110,14 @@ pub fn part1(input: &Input) -> usize {
 
     // Product of Tile ID's at corners.
     vec![
-        puzzle[0],
-        puzzle[size - 1],
-        puzzle[size * (size - 1)],
-        puzzle[(size * size) - 1],
-    ].iter().map(|t| t.id).product()
+        &puzzle[0],
+        &puzzle[size - 1],
+        &puzzle[size * (size - 1)],
+        &puzzle[(size * size) - 1],
+    ]
+    .iter()
+    .map(|t| t.id)
+    .product()
 }
 
 #[cfg(test)]

@@ -14,10 +14,10 @@ pub fn parse_input(input: &str) -> Input {
             let mut it = tile.lines();
             let header = it.next().unwrap().trim();
             let id = header_re.captures(header).unwrap()[1].parse().unwrap();
-            let mut image = [[false; 10]; 10];
+            let mut image = Image::new(10);
             for (y, line) in it.enumerate() {
                 for (x, ch) in line.chars().enumerate() {
-                    image[y][x] = ch == '#';
+                    image.set(y, x, ch == '#');
                 }
             }
 

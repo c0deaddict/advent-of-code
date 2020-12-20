@@ -4,9 +4,6 @@ use std::fmt;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-pub type Image = [[bool; 10]; 10];
-pub type Border = [bool; 10];
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum Rotate {
     R0,
@@ -75,106 +72,148 @@ pub enum Side {
     Right,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub struct Tile {
-    pub id: usize,
-    pub image: Image,
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct Image {
+    pub size: usize,
+    pub data: Vec<bool>,
     pub config: Config,
 }
 
-impl fmt::Display for Tile {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}", self.id, self.config)
-    }
-}
-
-impl Tile {
-    pub fn new(id: usize, image: Image) -> Tile {
+impl Image {
+    pub fn new(size: usize) -> Image {
         let config = Config {
             hflip: false,
             vflip: false,
             rotate: Rotate::R0,
         };
-        Tile { id, image, config }
+        let data = vec![false; size * size];
+        Image { size, data, config }
     }
 
-    fn rotate(&self) -> Tile {
-        let mut image = [[false; 10]; 10];
-        for y in 0..10 {
-            for x in 0..10 {
-                image[y][x] = self.image[x][9 - y];
-            }
-        }
-        Tile {
-            image,
-            id: self.id,
-            config: self.config.rotate(),
-        }
+    pub fn get(&self, y: usize, x: usize) -> bool {
+        self.data[y * self.size + x]
     }
 
-    fn hflip(&self) -> Tile {
-        let mut image = [[false; 10]; 10];
-        for y in 0..10 {
-            for x in 0..10 {
-                image[y][x] = self.image[9 - y][x];
-            }
-        }
-        Tile {
-            image,
-            id: self.id,
-            config: self.config.hflip(),
+    pub fn set(&mut self, y: usize, x: usize, v: bool) {
+        self.data[y * self.size + x] = v;
+    }
+
+    pub fn count(&self) -> usize {
+        self.data.iter().filter(|x| **x).count()
+    }
+
+    fn new_config(&self, config: Config) -> Image {
+        let data = self.data.clone();
+        Image {
+            config,
+            data,
+            ..*self
         }
     }
 
-    fn vflip(&self) -> Tile {
-        let mut image = [[false; 10]; 10];
-        for y in 0..10 {
-            for x in 0..10 {
-                image[y][x] = self.image[y][9 - x];
+    fn rotate(&self) -> Image {
+        let mut res = self.new_config(self.config.rotate());
+        for y in 0..self.size {
+            for x in 0..self.size {
+                res.set(y, x, self.get(x, (self.size - 1) - y));
             }
         }
-        Tile {
-            image,
-            id: self.id,
-            config: self.config.vflip(),
+        res
+    }
+
+    fn hflip(&self) -> Image {
+        let mut res = self.new_config(self.config.hflip());
+        for y in 0..self.size {
+            for x in 0..self.size {
+                res.set(y, x, self.get((self.size - 1) - y, x));
+            }
         }
+        res
+    }
+
+    fn vflip(&self) -> Image {
+        let mut res = self.new_config(self.config.vflip());
+        for y in 0..self.size {
+            for x in 0..self.size {
+                res.set(y, x, self.get(y, (self.size - 1) - x));
+            }
+        }
+        res
     }
 
     // 8 configs: 16 permutations but 8 are identical.
-    pub fn configs(&self) -> Vec<Tile> {
+    pub fn configs(&self) -> Vec<Image> {
         let mut res = vec![];
 
-        let tile = *self;
-        res.push(tile);
-        res.push(tile.hflip());
-        res.push(tile.vflip());
+        res.push(self.clone());
+        res.push(self.hflip());
+        res.push(self.vflip());
 
-        let r90 = tile.rotate();
-        res.push(r90);
+        let r90 = self.rotate();
+        res.push(r90.clone());
         res.push(r90.hflip());
 
         let r180 = r90.rotate();
-        res.push(r180);
+        res.push(r180.clone());
 
         let r270 = r180.rotate();
-        res.push(r270);
+        res.push(r270.clone());
         res.push(r270.hflip());
 
         res
     }
+}
+
+pub type Border = [bool; 10];
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct Tile {
+    pub id: usize,
+    pub image: Image,
+}
+
+impl fmt::Display for Tile {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.id, self.image.config)
+    }
+}
+
+impl Tile {
+    pub fn new(id: usize, image: Image) -> Tile {
+        Tile { id, image }
+    }
+
+    pub fn configs(&self) -> Vec<Tile> {
+        self.image
+            .configs()
+            .iter()
+            .map(|image| Tile {
+                image: image.clone(),
+                ..*self
+            })
+            .collect()
+    }
 
     fn border_top(&self) -> Border {
-        self.image[0]
+        let mut res = [false; 10];
+        for x in 0..10 {
+            res[x] = self.image.get(0, x);
+        }
+        res
     }
 
     fn border_bottom(&self) -> Border {
-        self.image[9]
+        let mut res = [false; 10];
+        for x in 0..10 {
+            res[x] = self.image.get(9, x);
+        }
+        res
     }
 
     fn border_left(&self) -> Border {
         let mut res = [false; 10];
         for y in 0..10 {
-            res[y] = self.image[y][0];
+            res[y] = self.image.get(y, 0);
         }
         res
     }
@@ -182,7 +221,7 @@ impl Tile {
     fn border_right(&self) -> Border {
         let mut res = [false; 10];
         for y in 0..10 {
-            res[y] = self.image[y][9];
+            res[y] = self.image.get(y, 9);
         }
         res
     }
