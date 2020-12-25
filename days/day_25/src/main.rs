@@ -21,9 +21,6 @@ fn find_loop_size(pubkey: usize) -> usize {
     while val != pubkey {
         val = (val * ENC_SUBJECT) % ENC_MOD;
         loop_size += 1;
-        if loop_size % 100_000_000 == 0 {
-            println!("{}", loop_size);
-        }
     }
     loop_size
 }
