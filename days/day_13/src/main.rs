@@ -50,27 +50,60 @@ fn part1(input: &Input) -> usize {
     panic!("not found!");
 }
 
+// compute: ax + by = gcd(a, b)
+// returns: (d = gcd(a, b), x, y)
+// source: https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/
+fn gcd_extended(a: isize, b: isize) -> (isize, isize, isize) {
+    if a == 0 {
+        (b, 0, 1)
+    } else {
+        let (d, x1, y1) = gcd_extended(b % a, a);
+        let x = y1 - (b / a) * x1;
+        let y = x1;
+        (d, x, y)
+    }
+}
+
+// source: https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/
+fn mod_inverse(a: isize, m: isize) -> Option<isize> {
+    let (d, x, _) = gcd_extended(a, m);
+    if d != 1 {
+        None
+    } else {
+        // m is added to handle negative x.
+        Some((x % m + m) % m)
+    }
+}
+
+// Use the Chinese Remainder Theorem to solve the set of equations:
+//
+//   timestamp   = 0 (mod id0)
+//   timestamp+1 = 0 (mod id1)
+//   ...
+//   timestamp+N = 0 (mod idN)
+//
+// These equations can be rewritten to:
+//
+//   timestamp = 0 (mod id0)
+//   timestamp = id1 - 1 (mod id1)
+//   ...
+//   timestamp = idN - N (mod idN)
+//
+// source: http://www-math.ucdenver.edu/~wcherowi/courses/m5410/crt.pdf
+//
 fn part2(input: &Input) -> usize {
-    let (offset, max_step) = input
+    let m_all: usize = input.busses.iter().map(|(_, id)| id).product();
+    let x: usize = input
         .busses
         .iter()
-        .max_by(|(_, a), (_, b)| a.cmp(b))
-        .unwrap();
-
-    let start = *max_step;
-    'outer: for i in (start..).step_by(*max_step) {
-        if i % 10000000 == 0 {
-            println!("{}", i);
-        }
-        for (j, bus) in input.busses.iter() {
-            if (i + j - offset) % bus != 0 {
-                continue 'outer;
-            }
-        }
-        return i - offset;
-    }
-
-    panic!("not found!");
+        .map(|(offset, id)| {
+            let a_i = id - (offset % id);
+            let m_i = m_all / id;
+            let y_i = mod_inverse(m_i as isize, *id as isize).unwrap() as usize;
+            a_i * m_i * y_i
+        })
+        .sum();
+    x % m_all
 }
 
 fn main() {
