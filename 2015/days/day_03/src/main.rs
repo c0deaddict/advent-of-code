@@ -1,22 +1,66 @@
 use lib::run;
+use std::collections::HashSet;
 
-type Input = Vec<i32>;
+#[derive(Debug, Clone, Eq, PartialEq)]
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+struct Position {
+    x: i32,
+    y: i32,
+}
+
+type Input = Vec<Direction>;
 
 fn parse_input(input: &str) -> Input {
     input
-        .lines()
-        .map(|l| l.trim())
-        .filter(|l| !l.is_empty())
-        .map(|l| l.parse::<i32>().unwrap())
+        .trim()
+        .chars()
+        .map(|ch| match ch {
+            '^' => Direction::North,
+            'v' => Direction::South,
+            '>' => Direction::East,
+            '<' => Direction::West,
+            _ => panic!("unknown direction {}", ch),
+        })
         .collect()
 }
 
-fn part_01(input: &Input) -> i32 {
-    panic!("failed to find answer");
+fn visit<'a, I>(input: I) -> HashSet<Position>
+where
+    I: Iterator<Item = &'a Direction>,
+{
+    let mut pos = Position { x: 0, y: 0 };
+    let mut visited = HashSet::new();
+    visited.insert(pos.clone());
+
+    for dir in input {
+        match dir {
+            Direction::North => pos.y -= 1,
+            Direction::South => pos.y += 1,
+            Direction::East => pos.x += 1,
+            Direction::West => pos.x -= 1,
+        }
+        visited.insert(pos.clone());
+    }
+
+    visited
 }
 
-fn part_02(input: &Input) -> i32 {
-    panic!("failed to find answer");
+fn part_01(input: &Input) -> usize {
+    visit(input.iter()).len()
+}
+
+fn part_02(input: &Input) -> usize {
+    let mut visited = HashSet::new();
+    visited.extend(visit(input.iter().step_by(2)));
+    visited.extend(visit(input.iter().skip(1).step_by(2)));
+    visited.len()
 }
 
 fn main() {
@@ -27,12 +71,23 @@ fn main() {
 mod tests {
     use super::*;
 
-    const EXAMPLE_DATA_1: &'static str = "
-    ";
+    #[test]
+    fn example1_part_1() {
+        assert_eq!(part_01(&parse_input("^>v<")), 4)
+    }
 
     #[test]
-    fn example_part_1() {
-        let input = parse_input(EXAMPLE_DATA_1);
-        assert_eq!(part_01(&input), 0)
+    fn example2_part_1() {
+        assert_eq!(part_01(&parse_input("^v^v^v^v^v")), 2)
+    }
+
+    #[test]
+    fn example1_part_2() {
+        assert_eq!(part_02(&parse_input("^>v<")), 3)
+    }
+
+    #[test]
+    fn example2_part_2() {
+        assert_eq!(part_02(&parse_input("^v^v^v^v^v")), 11)
     }
 }
