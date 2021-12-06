@@ -94,7 +94,9 @@ dependencies = [
 name = "day_06"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.10.1",
  "lib",
+ "regex",
 ]
 
 [[package]]
