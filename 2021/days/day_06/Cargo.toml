@@ -9,4 +9,3 @@ edition = "2018"
 [dependencies]
 lib = { path = "../../lib" }
 itertools = "0.10"
-regex = "1"
