@@ -1,32 +1,21 @@
-use itertools::Itertools;
 use lib::run;
-use std::collections::HashMap;
 
-type Input = HashMap<usize, usize>;
+type Input = Vec<usize>;
 
 fn parse_input(input: &str) -> Input {
-    input
-        .trim()
-        .split(",")
-        .map(|s| s.parse::<usize>().unwrap())
-        .sorted()
-        .group_by(|i| *i)
-        .into_iter()
-        .map(|(i, g)| (i, g.count()))
-        .collect()
+    let mut res = vec![0; 9];
+    for s in input.trim().split(",") {
+        res[s.parse::<usize>().unwrap()] += 1;
+    }
+    return res;
 }
 
 fn simulate(input: &Input, days: usize) -> usize {
-    let mut state = vec![];
-    for i in 0..9 {
-        state.push(*input.get(&i).unwrap_or(&0));
-    }
+    let mut state = input.clone();
 
     for _ in 0..days {
         let birth = state[0];
-        for j in 1..9 {
-            state[j - 1] = state[j];
-        }
+        state.rotate_left(1);
         state[6] += birth;
         state[8] = birth;
     }
