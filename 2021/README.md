@@ -2,10 +2,11 @@
 
 https://adventofcode.com/
 
-Implementation language for this year: Rust
+Implementation languages for this year: Rust and/or Python
 
-# Running
+# Running Rust
 
 ```shell
+cd rust
 cargo run -p day_01
 ```
