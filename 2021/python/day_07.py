@@ -26,7 +26,7 @@ def part2(input):
     )
 
 def main():
-    with open('input.txt', 'r') as f:
+    with open("../input/day_07.txt", "r") as f:
         input = parse_input(f.read())
 
     print("part1:", part1(input))

@@ -53,7 +53,7 @@ def part2(input):
     return sum(compute_output(e, find_order(e)) for e in input)
 
 def main():
-    with open('input.txt', 'r') as f:
+    with open("../input/day_08.txt", "r") as f:
         input = parse_input(f.read())
 
     print("part1:", part1(input))
