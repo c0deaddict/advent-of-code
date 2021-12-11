@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 lib = { path = "../../lib" }
+termion = "1"
+lazy_static = "1"

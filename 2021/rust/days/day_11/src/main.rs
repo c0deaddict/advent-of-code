@@ -1,5 +1,9 @@
+use core::time;
 use lib::run;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::thread;
+use termion::color;
+use termion::color::AnsiValue;
 
 #[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
 struct Position {
@@ -47,6 +51,30 @@ fn neighbours(pos: &Position) -> Vec<Position> {
     .collect()
 }
 
+fn print(state: &Input) {
+    print!("{}", termion::clear::All);
+    let maxx = state.keys().max_by_key(|p| p.x).unwrap().x;
+    let maxy = state.keys().max_by_key(|p| p.y).unwrap().y;
+    for y in 0..maxy {
+        for x in 0..maxx {
+            let energy = *state.get(&Position { x, y }).unwrap();
+            let (color, s) = match energy {
+                0..=9 => {
+                    let gray = 5 + energy * 2; // 24 gray levels.
+                    (
+                        AnsiValue::grayscale(gray as u8).fg_string(),
+                        energy.to_string(),
+                    )
+                }
+                _ => (color::Fg(color::Yellow).to_string(), "0".to_string()),
+            };
+            print!("{}{}", color, s);
+        }
+        println!("{}", color::Reset.fg_str());
+    }
+    thread::sleep(time::Duration::from_millis(100));
+}
+
 fn step(state: &mut Input) -> usize {
     let mut flashes = 0;
 
@@ -63,6 +91,8 @@ fn step(state: &mut Input) -> usize {
             }
         });
     }
+
+    print(state);
 
     // Reset energy.
     for (_, energy) in state {
