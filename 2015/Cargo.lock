@@ -218,14 +218,19 @@ dependencies = [
 name = "day_21"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.10.1",
  "lib",
+ "regex",
 ]
 
 [[package]]
 name = "day_22"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.10.1",
+ "lazy_static",
  "lib",
+ "regex",
 ]
 
 [[package]]
