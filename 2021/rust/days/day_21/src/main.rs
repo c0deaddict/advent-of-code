@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use lib::run;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 struct Player {
