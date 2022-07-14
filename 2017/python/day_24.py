@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import pytest
-import copy
 from collections import defaultdict
 from functools import cmp_to_key
 
