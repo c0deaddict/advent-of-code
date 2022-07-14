@@ -214,7 +214,7 @@ fn part_01(input: &Input) -> i32 {
     let me = Player { hp: 50, mana: 500 };
     let boss = input;
 
-    (13..14)
+    (14..15)
         .flat_map(|n| SpellPermutations::new(n))
         .filter_map(|spells| {
             if fight(&me, &boss, &spells) {

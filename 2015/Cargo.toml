@@ -1,2 +1,2 @@
 [workspace]
-members = ["lib", "days/*"]
+members = ["rust/lib", "rust/days/*"]

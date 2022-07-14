@@ -22,7 +22,7 @@ fn part_02(input: &Input) -> i32 {
         floor += match ch {
             '(' => 1,
             ')' => -1,
-            _ => 0,            
+            _ => 0,
         };
         if floor < 0 {
             return pos as i32 + 1;
@@ -33,7 +33,7 @@ fn part_02(input: &Input) -> i32 {
 }
 
 fn main() {
-    run(1, include_str!("input.txt"), parse_input, part_01, part_02)
+    run(1, include_str!("../../../../input/day_1.txt"), parse_input, part_01, part_02)
 }
 
 #[cfg(test)]
@@ -51,5 +51,5 @@ mod tests {
     fn examples_part_2() {
         assert_eq!(part_02(&")"), 1);
         assert_eq!(part_02(&"()())"), 5);
-    }     
+    }
 }

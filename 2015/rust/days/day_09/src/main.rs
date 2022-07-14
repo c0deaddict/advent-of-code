@@ -1,8 +1,7 @@
-use std::collections::HashSet;
-
 use lib::run;
-use petgraph::{graphmap::UnGraphMap, visit::Dfs};
+use petgraph::graphmap::UnGraphMap;
 use regex::Regex;
+use std::collections::HashSet;
 
 type Input<'a> = UnGraphMap<&'a str, usize>;
 
