@@ -84,26 +84,28 @@ def run_virus_pt2(states, pos, dir, bursts):
     return num_infected
 
 
-def main():
-    #with open('day22.input.txt') as f:
-    #    grid = [[c == '#' for c in line.strip()] for line in f.readlines()]
-
-    grid = [[False, False, True], [True, False, False], [False, False, False]]
-
-    height = len(grid)
-    width = len(grid[0])
-    pos = (width // 2, height // 2)
-    dir = Dir.UP
-
+def make_states(grid):
     states = {}
     for y, row in enumerate(grid):
         for x, c in enumerate(row):
             if c:
                 states[(x, y)] = State.INFECTED
 
-    print(run_virus(states, pos, dir, 10000))
+    return states
 
-    print(run_virus_pt2(states, pos, dir, 100))
+
+def main():
+    with open('../input/day22.input.txt') as f:
+       grid = [[c == '#' for c in line.strip()] for line in f.readlines()]
+
+    height = len(grid)
+    width = len(grid[0])
+    init_pos = (width // 2, height // 2)
+    dir = Dir.UP
+    init_states = make_states(grid)
+
+    print(run_virus(dict(init_states), init_pos, dir, 10000))
+    print(run_virus_pt2(dict(init_states), init_pos, dir, 10000000))
 
 
 if __name__ == '__main__':

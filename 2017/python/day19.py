@@ -60,7 +60,7 @@ def follow_path(grid, x, y, dir):
 
 def main():
     grid = []
-    with open('day19.input.txt') as f:
+    with open('../input/day19.input.txt') as f:
         for line in f.readlines():
             grid.append([c for c in line.rstrip('\n')])
 

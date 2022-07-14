@@ -108,7 +108,7 @@ def count_garbage(node):
 
 
 def main():
-    with open('day9_1.input.txt') as f:
+    with open('../input/day9_1.input.txt') as f:
         group = parse(f.read())
         print(count_garbage(group))
 

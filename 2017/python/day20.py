@@ -49,7 +49,7 @@ def simulate(particles):
 
 
 def main():
-    with open('day20.input.txt') as f:
+    with open('../input/day20.input.txt') as f:
         particles = [parse_particle(i, line) for i, line in enumerate(f.readlines())]
 
         def sort_key(p):

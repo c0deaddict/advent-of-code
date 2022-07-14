@@ -80,7 +80,7 @@ def parse_line(line):
 
 
 def main():
-    with open('day7_1.input.txt') as f:
+    with open('../input/day7_1.input.txt') as f:
         print(find_root([parse_line(line) for line in f]))
 
 

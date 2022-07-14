@@ -88,7 +88,7 @@ def run(rules, grid, num):
 
 
 def main():
-    with open('day21.input.txt') as f:
+    with open('../input/day21.input.txt') as f:
         rules = [parse_rule(line) for line in f.readlines()]
 
     start = ['.#.', '..#', '###']

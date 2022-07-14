@@ -173,7 +173,7 @@ def parse_instr(line):
 
 
 def main():
-    with open('day18.input.txt') as f:
+    with open('../input/day18.input.txt') as f:
         instructions = [parse_instr(line.strip()) for line in f.readlines()]
         p0 = Program(0, instructions)
         p1 = Program(1, instructions)

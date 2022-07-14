@@ -137,7 +137,7 @@ def score(group, depth=1):
 
 
 def main():
-    with open('day9_1.input.txt') as f:
+    with open('../input/day9_1.input.txt') as f:
         group = parse(f.read())
         print(score(group))
 

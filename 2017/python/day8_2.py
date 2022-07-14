@@ -52,7 +52,7 @@ def parse_instr(line):
 
 
 def main():
-    with open('day8_1.input.txt') as f:
+    with open('../input/day8_1.input.txt') as f:
         highest = run([parse_instr(line) for line in f.readlines()])
         print(highest)
 

@@ -68,7 +68,7 @@ def shortest_path(pos):
 
 
 def main():
-    with open('day11_1.input.txt') as f:
+    with open('../input/day11_1.input.txt') as f:
         steps = f.read().split(',')
         path = walk(steps)
         print(shortest_path(path[-1]))

@@ -30,7 +30,7 @@ def run(program):
 
 
 def main():
-    with open('day5_1.input.txt') as f:
+    with open('../input/day5_1.input.txt') as f:
         program = [int(line.strip()) for line in f.readlines()]
 
     print(run(program))

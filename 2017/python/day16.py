@@ -160,7 +160,7 @@ def final_spin(spin, programs):
 
 
 def main():
-    with open('day16.input.txt') as f:
+    with open('../input/day16.input.txt') as f:
         moves = [parse_move(str) for str in f.read().split(',')]
 
     program = '\n'.join(compile_program(moves))

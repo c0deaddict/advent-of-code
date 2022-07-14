@@ -342,7 +342,7 @@ def go_undetected(layers):
 
 
 def main():
-    with open('day13.input.txt') as f:
+    with open('../input/day13.input.txt') as f:
         pairs = [line.strip().split(': ', 1) for line in f.readlines()]
         layers = {int(k): int(v) for k, v in pairs}
         print(traverse(layers))

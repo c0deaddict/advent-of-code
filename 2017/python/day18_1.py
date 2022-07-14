@@ -115,7 +115,7 @@ def run(program):
 
 
 def main():
-    with open('day18.input.txt') as f:
+    with open('../input/day18.input.txt') as f:
         program = [parse_instr(line.strip()) for line in f.readlines()]
         run(program)
 

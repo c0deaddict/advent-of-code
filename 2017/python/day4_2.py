@@ -21,7 +21,7 @@ def is_valid_passphrase(phrase):
 
 
 def main():
-    with open('day4_1.input.txt') as f:
+    with open('../input/day4_1.input.txt') as f:
         lines = f.readlines()
 
     print(len([line for line in lines if is_valid_passphrase(line.strip())]))
