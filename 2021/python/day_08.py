@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import pytest
 from collections import namedtuple
 from itertools import permutations

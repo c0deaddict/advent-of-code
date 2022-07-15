@@ -1,7 +1,7 @@
 (ns aoc2018.day22
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :as t]
+            [clojure.test :refer [deftest is testing]]
             [clojure.pprint :refer [pprint]]
             [aoc2018.utils :refer :all]
             [loom.graph]
@@ -12,10 +12,6 @@
 (def my-input
   {:depth 3198
    :target [12 757]})
-
-(def test-data
-  {:depth 510
-   :target [10 10]})
 
 (defn geologic-index [{:keys [grid target]} [x y]]
   (cond
@@ -152,7 +148,7 @@
         graph (loom.graph/weighted-graph (to-graph cave))
         start [[0 0] :torch]
         end [target :torch]
-        alg :astar-custom]
+        alg :astar-loom]
     (println target)
     (println (count (loom.graph/edges graph)))
     (case alg
@@ -173,3 +169,13 @@
   (let [input my-input]
     (println (solve-part-1 input))
     (println (solve-part-2 input))))
+
+(deftest test-part1
+  (let [input {:depth 510
+               :target [10 10]}]
+    (is (= (solve-part-1 input) 114))))
+
+(deftest test-part2
+  (let [input {:depth 510
+               :target [10 10]}]
+    (is (= (solve-part-2 input) 45))))

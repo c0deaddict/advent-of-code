@@ -14,4 +14,5 @@
   :main ^:skip-aot aoc2018.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
+  :test-paths ["src"]
   :jvm-opts ["-Xmx8G"])

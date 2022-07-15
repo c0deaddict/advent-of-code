@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import random
 from statistics import median
 import pytest
