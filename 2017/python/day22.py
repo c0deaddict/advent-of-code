@@ -95,8 +95,8 @@ def make_states(grid):
 
 
 def main():
-    with open('../input/day22.input.txt') as f:
-       grid = [[c == '#' for c in line.strip()] for line in f.readlines()]
+    with open("../input/day22.input.txt") as f:
+        grid = [[c == "#" for c in line.strip()] for line in f.readlines()]
 
     height = len(grid)
     width = len(grid[0])
@@ -108,5 +108,5 @@ def main():
     print(run_virus_pt2(dict(init_states), init_pos, dir, 10000000))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -35,20 +35,20 @@
 
 def step(pos, dir):
     x, y = pos
-    if dir == 'n':
+    if dir == "n":
         return x, y - 2
-    elif dir == 'ne':
+    elif dir == "ne":
         return x + 1, y - 1
-    elif dir == 'nw':
+    elif dir == "nw":
         return x - 1, y - 1
-    elif dir == 's':
+    elif dir == "s":
         return x, y + 2
-    elif dir == 'sw':
+    elif dir == "sw":
         return x - 1, y + 1
-    elif dir == 'se':
+    elif dir == "se":
         return x + 1, y + 1
     else:
-        raise ValueError('unknown dir: %s' % dir)
+        raise ValueError("unknown dir: %s" % dir)
 
 
 def walk(steps):
@@ -68,12 +68,12 @@ def shortest_path(pos):
 
 
 def main():
-    with open('../input/day11_1.input.txt') as f:
-        steps = f.read().split(',')
+    with open("../input/day11_1.input.txt") as f:
+        steps = f.read().split(",")
         path = walk(steps)
         print(shortest_path(path[-1]))
         print(max(map(shortest_path, path)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,9 +1,9 @@
 def parse_grid(str):
-    return str.split('/')
+    return str.split("/")
 
 
 def parse_rule(line):
-    left, right = line.strip().split(' => ')
+    left, right = line.strip().split(" => ")
     return parse_grid(left), parse_grid(right)
 
 
@@ -20,7 +20,7 @@ def flip_vert(grid):
 
 
 def rotate_90(grid):
-    res = ['']*len(grid[0])
+    res = [""] * len(grid[0])
     for row in reversed(grid):
         for i, c in enumerate(row):
             res[i] += c
@@ -32,7 +32,7 @@ def rotate_180(grid):
 
 
 def rotate_270(grid):
-    res = ['']*len(grid[0])
+    res = [""] * len(grid[0])
     for row in grid:
         for i, c in enumerate(reversed(row)):
             res[i] += c
@@ -60,7 +60,7 @@ def convert(rules, grid):
             if rule == f(grid):
                 return replacement
 
-    raise ValueError('no match found')
+    raise ValueError("no match found")
 
 
 def iterate(rules, grid):
@@ -69,11 +69,11 @@ def iterate(rules, grid):
     for i in range(0, len(grid), size):
         row = []
         for j in range(0, len(grid[i]), size):
-            subgrid = [row[j:j+size] for row in grid[i:i+size]]
+            subgrid = [row[j : j + size] for row in grid[i : i + size]]
             row.append(convert(rules, subgrid))
 
         for cells in zip(*row):
-            result.append(''.join(cells))
+            result.append("".join(cells))
 
     return result
 
@@ -88,16 +88,16 @@ def run(rules, grid, num):
 
 
 def main():
-    with open('../input/day21.input.txt') as f:
+    with open("../input/day21.input.txt") as f:
         rules = [parse_rule(line) for line in f.readlines()]
 
-    start = ['.#.', '..#', '###']
+    start = [".#.", "..#", "###"]
     grid = run(rules, start, 5)
-    print(''.join(grid).count('#'))
+    print("".join(grid).count("#"))
 
     grid = run(rules, start, 18)
-    print(''.join(grid).count('#'))
+    print("".join(grid).count("#"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -115,6 +115,7 @@ def make_gen(start, factor, mod=None):
             value = (value * factor) % 2147483647
             if mod is None or value % mod == 0:
                 yield value
+
     return iter(gen())
 
 
@@ -123,7 +124,7 @@ def judge(ga, gb, num):
     for i in range(0, num):
         a = next(ga)
         b = next(gb)
-        if (a & 0xffff) == (b & 0xffff):
+        if (a & 0xFFFF) == (b & 0xFFFF):
             count += 1
     return count
 
@@ -138,5 +139,5 @@ def main():
     print(judge(ga, gb, 5000000))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -45,13 +45,13 @@ def cycle(state):
     new_state = state[:]
     new_state[index] = 0
     for i in range(blocks):
-        new_state[(index + i+1) % len(new_state)] += 1
+        new_state[(index + i + 1) % len(new_state)] += 1
 
     return new_state
 
 
 def serialize_state(state):
-    return ','.join(map(str, state))
+    return ",".join(map(str, state))
 
 
 def solve(input):
@@ -73,5 +73,5 @@ def main():
     print(solve(input))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

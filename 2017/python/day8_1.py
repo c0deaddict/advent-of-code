@@ -29,16 +29,16 @@
 import re
 from collections import namedtuple, defaultdict
 
-Instruction = namedtuple('Instruction', 'dst_reg inc if_reg cond cond_value')
+Instruction = namedtuple("Instruction", "dst_reg inc if_reg cond cond_value")
 
 
 compare_conds = {
-    '<':  lambda a, b: a < b,
-    '>':  lambda a, b: a > b,
-    '==': lambda a, b: a == b,
-    '!=': lambda a, b: a != b,
-    '<=': lambda a, b: a <= b,
-    '>=': lambda a, b: a >= b,
+    "<": lambda a, b: a < b,
+    ">": lambda a, b: a > b,
+    "==": lambda a, b: a == b,
+    "!=": lambda a, b: a != b,
+    "<=": lambda a, b: a <= b,
+    ">=": lambda a, b: a >= b,
 }
 
 
@@ -57,10 +57,10 @@ def run(instructions):
 
 
 def parse_instr(line):
-    m = re.match('^(\w+) (inc|dec) (-?\d+) if (\w+) (<|>|==|!=|<=|>=) (-?\d+)$', line)
+    m = re.match("^(\w+) (inc|dec) (-?\d+) if (\w+) (<|>|==|!=|<=|>=) (-?\d+)$", line)
     return Instruction(
         dst_reg=m.group(1),
-        inc=int(m.group(3)) * (-1 if m.group(2) == 'dec' else 1),
+        inc=int(m.group(3)) * (-1 if m.group(2) == "dec" else 1),
         if_reg=m.group(4),
         cond=m.group(5),
         cond_value=int(m.group(6)),
@@ -68,10 +68,10 @@ def parse_instr(line):
 
 
 def main():
-    with open('../input/day8_1.input.txt') as f:
+    with open("../input/day8_1.input.txt") as f:
         register_file = run([parse_instr(line) for line in f.readlines()])
         print(max(register_file.values()))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

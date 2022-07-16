@@ -2,11 +2,10 @@ import pytest
 from collections import defaultdict
 from functools import cmp_to_key
 
+
 def parse_input(input):
-    return [
-        tuple(map(int, s.split('/', 2)))
-        for s in input.strip().splitlines()
-    ]
+    return [tuple(map(int, s.split("/", 2))) for s in input.strip().splitlines()]
+
 
 def connections(input):
     conns = defaultdict(list)
@@ -14,6 +13,7 @@ def connections(input):
         conns[a].append(b)
         conns[b].append(a)
     return conns
+
 
 def enumerate_bridges(pipes):
     queue = [([0], set())]
@@ -29,8 +29,10 @@ def enumerate_bridges(pipes):
                 results.append(new_bridge)
     return results
 
+
 def part1(input):
     return max(map(sum, enumerate_bridges(input)))
+
 
 def part2(input):
     def compare_length_and_strength(a, b):
@@ -38,14 +40,19 @@ def part2(input):
             return len(a) - len(b)
         else:
             return sum(a) - sum(b)
-    return sum(max(enumerate_bridges(input), key=cmp_to_key(compare_length_and_strength)))
+
+    return sum(
+        max(enumerate_bridges(input), key=cmp_to_key(compare_length_and_strength))
+    )
+
 
 def main():
-    with open('../input/day_24.txt', 'r') as f:
+    with open("../input/day_24.txt", "r") as f:
         input = parse_input(f.read())
 
     print("part1:", part1(input))
     print("part2:", part2(input))
+
 
 if __name__ == "__main__":
     main()
@@ -62,8 +69,10 @@ EXAMPLE_DATA_1 = """
 9/10
 """
 
+
 def test_part1():
     assert part1(parse_input(EXAMPLE_DATA_1)) == 31
+
 
 def test_part2():
     assert part2(parse_input(EXAMPLE_DATA_1)) == 19

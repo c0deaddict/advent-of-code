@@ -54,7 +54,7 @@
 #
 from collections import namedtuple
 
-Instruction = namedtuple('Instruction', 'op args')
+Instruction = namedtuple("Instruction", "op args")
 
 
 def parse_arg(arg):
@@ -78,26 +78,26 @@ def load(register_file, arg):
 
 def step(program, pc, rc, register_file):
     instr = program[pc]
-    if instr.op == 'snd':
+    if instr.op == "snd":
         rc = register_file[instr.args[0]]
-    elif instr.op == 'set':
+    elif instr.op == "set":
         arg = load(register_file, instr.args[1])
         register_file[instr.args[0]] = arg
-    elif instr.op == 'add':
+    elif instr.op == "add":
         arg = load(register_file, instr.args[1])
         register_file[instr.args[0]] += arg
-    elif instr.op == 'mul':
+    elif instr.op == "mul":
         arg = load(register_file, instr.args[1])
         register_file[instr.args[0]] *= arg
-    elif instr.op == 'mod':
+    elif instr.op == "mod":
         arg = load(register_file, instr.args[1])
         register_file[instr.args[0]] %= arg
-    elif instr.op == 'rcv':
+    elif instr.op == "rcv":
         x = load(register_file, instr.args[0])
         if x != 0:
-            print('recovers ', rc)
+            print("recovers ", rc)
             exit()
-    elif instr.op == 'jgz':
+    elif instr.op == "jgz":
         x = load(register_file, instr.args[0])
         if x > 0:
             offset = load(register_file, instr.args[1])
@@ -107,7 +107,7 @@ def step(program, pc, rc, register_file):
 
 
 def run(program):
-    register_file = dict({chr(ord('a') + i): 0 for i in range(0, 26)})
+    register_file = dict({chr(ord("a") + i): 0 for i in range(0, 26)})
     pc = 0
     rc = None
     while 0 <= pc < len(program):
@@ -115,10 +115,10 @@ def run(program):
 
 
 def main():
-    with open('../input/day18.input.txt') as f:
+    with open("../input/day18.input.txt") as f:
         program = [parse_instr(line.strip()) for line in f.readlines()]
         run(program)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

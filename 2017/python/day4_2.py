@@ -16,16 +16,16 @@
 
 
 def is_valid_passphrase(phrase):
-    words = [''.join(sorted(word)) for word in phrase.split()]
+    words = ["".join(sorted(word)) for word in phrase.split()]
     return len(set(words)) == len(words)
 
 
 def main():
-    with open('../input/day4_1.input.txt') as f:
+    with open("../input/day4_1.input.txt") as f:
         lines = f.readlines()
 
     print(len([line for line in lines if is_valid_passphrase(line.strip())]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

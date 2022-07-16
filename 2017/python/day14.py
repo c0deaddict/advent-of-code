@@ -67,7 +67,7 @@ from day12 import count_groups
 
 
 def to_bits(dense_hash):
-    return ''.join(map(lambda v: '{0:08b}'.format(v), dense_hash))
+    return "".join(map(lambda v: "{0:08b}".format(v), dense_hash))
 
 
 def is_valid(x, y):
@@ -79,10 +79,10 @@ def square_id(x, y):
 
 
 def main():
-    input = 'xlqgujun'
+    input = "xlqgujun"
     grid = []
     for row in range(0, 128):
-        row_bits = to_bits(knot_hash('{}-{}'.format(input, row)))
+        row_bits = to_bits(knot_hash("{}-{}".format(input, row)))
         grid.append([bool(int(i)) for i in row_bits])
 
     # Transform to a graph
@@ -92,12 +92,7 @@ def main():
             if not grid[y][x]:
                 continue
 
-            neighbours = [
-                (x-1, y),
-                (x, y+1),
-                (x+1, y),
-                (x, y-1)
-            ]
+            neighbours = [(x - 1, y), (x, y + 1), (x + 1, y), (x, y - 1)]
 
             my_edges = []
             for (nx, ny) in neighbours:
@@ -112,5 +107,5 @@ def main():
     print(count_groups(dict(edges)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

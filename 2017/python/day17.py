@@ -68,7 +68,7 @@ def spinlock(step_size, cycles):
     pos = 0
     for i in range(0, cycles):
         pos = 1 + (pos + step_size) % len(buffer)
-        buffer.insert(pos, i+1)
+        buffer.insert(pos, i + 1)
     return buffer, pos
 
 
@@ -78,5 +78,5 @@ def main():
     print(buffer[nextpos])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

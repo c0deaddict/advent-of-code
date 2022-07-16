@@ -30,17 +30,17 @@ def solve(input):
     spiral = [1]
 
     while spiral[-1] < input:
-        x, y = spiral_coords(len(spiral)+1)
+        x, y = spiral_coords(len(spiral) + 1)
 
         neighbours = [
-            (x-1, y-1),
-            (x-1, y),
-            (x-1, y+1),
-            (x,   y-1),
-            (x,   y+1),
-            (x+1, y-1),
-            (x+1, y),
-            (x+1, y+1),
+            (x - 1, y - 1),
+            (x - 1, y),
+            (x - 1, y + 1),
+            (x, y - 1),
+            (x, y + 1),
+            (x + 1, y - 1),
+            (x + 1, y),
+            (x + 1, y + 1),
         ]
 
         value = 0
@@ -56,17 +56,17 @@ def solve(input):
 
 def spiral_coords(pos):
     size = ceil(sqrt(pos))
-    start = 1 + (size-1)*(size-1)
+    start = 1 + (size - 1) * (size - 1)
     diff = pos - start
     r = size // 2
     if size % 2 == 0:
         if diff < size:
             # right
             x = r
-            y = diff - (r-1)
+            y = diff - (r - 1)
         else:
             # top
-            x = (r-1) - (diff - size)
+            x = (r - 1) - (diff - size)
             y = r
     else:
         if diff < size:
@@ -75,7 +75,7 @@ def spiral_coords(pos):
             y = r - diff
         else:
             # bottom
-            x = (diff - size) - (r-1)
+            x = (diff - size) - (r - 1)
             y = -r
 
     return x, y
@@ -83,22 +83,22 @@ def spiral_coords(pos):
 
 def spiral_pos(x, y):
     r = max(abs(x), abs(y))
-    size = 1 + r*2
-    start = (size-1)*(size-1) - (size-2)*2
-    end = size*size
+    size = 1 + r * 2
+    start = (size - 1) * (size - 1) - (size - 2) * 2
+    end = size * size
 
     if x == r:
         if y == -r:
             return end
         else:
             # right
-            return start + (r-1) + y
+            return start + (r - 1) + y
     elif x == -r:
         # left
-        return start + (size-2)*2+1 + r - y
+        return start + (size - 2) * 2 + 1 + r - y
     elif y == r:
         # top
-        return start + (size-1) + (r-1) - x
+        return start + (size - 1) + (r - 1) - x
     elif y == -r:
         # bottom
         return end + x - r

@@ -29,7 +29,7 @@ import re
 from collections import namedtuple
 
 
-Program = namedtuple('program', 'name weight children')
+Program = namedtuple("program", "name weight children")
 
 
 def find_root(tree):
@@ -68,20 +68,20 @@ def search_unbalanced_subtree(tree, name, diff):
 
 
 def parse_line(line):
-    res = re.match('^(\w+) \((\d+)\)(?: -> (\w+(?:, \w+)*))?$', line)
+    res = re.match("^(\w+) \((\d+)\)(?: -> (\w+(?:, \w+)*))?$", line)
     return Program(
         name=res.group(1),
         weight=int(res.group(2)),
-        children=[] if res.group(3) is None else res.group(3).split(', ')
+        children=[] if res.group(3) is None else res.group(3).split(", "),
     )
 
 
 def main():
-    with open('../input/day7_1.input.txt') as f:
+    with open("../input/day7_1.input.txt") as f:
         tree = {program.name: program for program in [parse_line(line) for line in f]}
         root = find_root(tree)
         print(search_unbalanced_subtree(tree, root, 0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

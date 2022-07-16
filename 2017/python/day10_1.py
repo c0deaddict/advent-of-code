@@ -64,10 +64,10 @@ def knot_hash(input):
 
     for l in input:
         # Select a portion of the list and reverse it.
-        selection = list(reversed([lst[i % len(lst)] for i in range(pos, pos+l)]))
+        selection = list(reversed([lst[i % len(lst)] for i in range(pos, pos + l)]))
 
         # Write back to the reversed selection into lst.
-        for i in range(pos, pos+l):
+        for i in range(pos, pos + l):
             lst[i % len(lst)] = selection[i - pos]
 
         pos = (pos + l + skip) % len(lst)
@@ -77,9 +77,9 @@ def knot_hash(input):
 
 
 def main():
-    input = '189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62'
-    print(knot_hash([int(l) for l in input.split(',')]))
+    input = "189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62"
+    print(knot_hash([int(l) for l in input.split(",")]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

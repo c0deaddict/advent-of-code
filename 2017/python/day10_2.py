@@ -51,7 +51,7 @@
 #
 from collections import namedtuple
 
-Knot = namedtuple('Knot', 'pos skip lst')
+Knot = namedtuple("Knot", "pos skip lst")
 
 
 def process_input(input):
@@ -69,11 +69,10 @@ def knot_update(k, input):
 
     for l in input:
         # Select a portion of the list and reverse it.
-        selection = list(reversed([lst[i % len(lst)]
-                                   for i in range(pos, pos+l)]))
+        selection = list(reversed([lst[i % len(lst)] for i in range(pos, pos + l)]))
 
         # Write back to the reversed selection into lst.
-        for i in range(pos, pos+l):
+        for i in range(pos, pos + l):
             lst[i % len(lst)] = selection[i - pos]
 
         pos = (pos + l + skip) % len(lst)
@@ -93,7 +92,7 @@ def dense_hash(k):
 
 
 def to_hex(dense_hash):
-    return ''.join(map(lambda v: '%02x' % v, dense_hash))
+    return "".join(map(lambda v: "%02x" % v, dense_hash))
 
 
 def knot_hash(str):
@@ -106,9 +105,9 @@ def knot_hash(str):
 
 
 def main():
-    input = '189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62'
+    input = "189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62"
     print(to_hex(knot_hash(input)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

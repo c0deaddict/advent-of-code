@@ -77,16 +77,16 @@ def count_groups(edges):
 
 
 def parse_line(line):
-    k, v = line.strip().split(' <-> ', 1)
-    return int(k), [int(i) for i in v.split(',')]
+    k, v = line.strip().split(" <-> ", 1)
+    return int(k), [int(i) for i in v.split(",")]
 
 
 def main():
-    with open('../input/day12.input.txt') as f:
+    with open("../input/day12.input.txt") as f:
         edges = dict([parse_line(line) for line in f.readlines()])
         print(len(find_connected(0, edges)))
         print(count_groups(edges))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

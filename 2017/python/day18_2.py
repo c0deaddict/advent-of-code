@@ -95,7 +95,7 @@
 
 from collections import namedtuple
 
-Instruction = namedtuple('Instruction', 'op args')
+Instruction = namedtuple("Instruction", "op args")
 
 
 class Program:
@@ -103,8 +103,8 @@ class Program:
         self.id = id
         self.instructions = instructions
         self.pc = 0
-        self.register_file = dict({chr(ord('a') + i): 0 for i in range(0, 26)})
-        self.register_file['p'] = id
+        self.register_file = dict({chr(ord("a") + i): 0 for i in range(0, 26)})
+        self.register_file["p"] = id
         self.queue = []
         self.waiting = False
         self.receive_into = None
@@ -116,28 +116,28 @@ class Program:
 
     def step(self):
         instr = self.instructions[self.pc]
-        if instr.op == 'snd':
+        if instr.op == "snd":
             self.send(self.load(instr.args[0]))
             self.send_count += 1
-        elif instr.op == 'set':
+        elif instr.op == "set":
             arg = self.load(instr.args[1])
             self.register_file[instr.args[0]] = arg
-        elif instr.op == 'add':
+        elif instr.op == "add":
             arg = self.load(instr.args[1])
             self.register_file[instr.args[0]] += arg
-        elif instr.op == 'mul':
+        elif instr.op == "mul":
             arg = self.load(instr.args[1])
             self.register_file[instr.args[0]] *= arg
-        elif instr.op == 'mod':
+        elif instr.op == "mod":
             arg = self.load(instr.args[1])
             self.register_file[instr.args[0]] %= arg
-        elif instr.op == 'rcv':
+        elif instr.op == "rcv":
             try:
                 self.register_file[instr.args[0]] = self.queue.pop(0)
             except IndexError:
                 self.waiting = True
                 self.receive_into = instr.args[0]
-        elif instr.op == 'jgz':
+        elif instr.op == "jgz":
             x = self.load(instr.args[0])
             if x > 0:
                 offset = self.load(instr.args[1])
@@ -173,15 +173,18 @@ def parse_instr(line):
 
 
 def main():
-    with open('../input/day18.input.txt') as f:
+    with open("../input/day18.input.txt") as f:
         instructions = [parse_instr(line.strip()) for line in f.readlines()]
         p0 = Program(0, instructions)
         p1 = Program(1, instructions)
         p0.send = p1.receive
         p1.send = p0.receive
 
-        while not p0.is_terminated() and not p1.is_terminated() and \
-                not (p0.waiting and p1.waiting):
+        while (
+            not p0.is_terminated()
+            and not p1.is_terminated()
+            and not (p0.waiting and p1.waiting)
+        ):
 
             if not p0.waiting:
                 p0.step()
@@ -191,5 +194,5 @@ def main():
         print(p1.send_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

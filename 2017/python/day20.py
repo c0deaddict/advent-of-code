@@ -1,16 +1,14 @@
 import re
 from collections import namedtuple, defaultdict
 
-Vec = namedtuple('Vec', 'x y z')
-Particle = namedtuple('Particle', 'id p v a')
+Vec = namedtuple("Vec", "x y z")
+Particle = namedtuple("Particle", "id p v a")
 
 
 def parse_particle(id, line):
     parts = dict()
-    for m in re.finditer('([pva])=<(-?\d+),(-?\d+),(-?\d+)>', line):
-        parts[m.group(1)] = Vec(x=int(m.group(2)),
-                                y=int(m.group(3)),
-                                z=int(m.group(4)))
+    for m in re.finditer("([pva])=<(-?\d+),(-?\d+),(-?\d+)>", line):
+        parts[m.group(1)] = Vec(x=int(m.group(2)), y=int(m.group(3)), z=int(m.group(4)))
     return Particle(id=id, **parts)
 
 
@@ -24,10 +22,7 @@ def vec_add(a, b):
 
 def move(p):
     v = vec_add(p.v, p.a)
-    return Particle(id=p.id,
-                    p=vec_add(p.p, v),
-                    v=v,
-                    a=p.a)
+    return Particle(id=p.id, p=vec_add(p.p, v), v=v, a=p.a)
 
 
 def tick(particles):
@@ -49,7 +44,7 @@ def simulate(particles):
 
 
 def main():
-    with open('../input/day20.input.txt') as f:
+    with open("../input/day20.input.txt") as f:
         particles = [parse_particle(i, line) for i, line in enumerate(f.readlines())]
 
         def sort_key(p):
@@ -61,5 +56,5 @@ def main():
         print(len(simulate(particles)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

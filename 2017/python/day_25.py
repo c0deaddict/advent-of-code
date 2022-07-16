@@ -15,8 +15,9 @@ RE_STATE = """In state (\w+):
     - Move one slot to the (left|right).
     - Continue with state (\w+)."""
 
-TuringMachine = namedtuple('TuringMachine', ['begin_state', 'diag_steps', 'states'])
-Action = namedtuple('Action', ['write_value', 'move_cursor', 'next_state'])
+TuringMachine = namedtuple("TuringMachine", ["begin_state", "diag_steps", "states"])
+Action = namedtuple("Action", ["write_value", "move_cursor", "next_state"])
+
 
 def parse_input(input):
     blocks = input.strip().split("\n\n")
@@ -35,6 +36,7 @@ def parse_input(input):
 
     return TuringMachine(begin_state, int(diag_steps), states)
 
+
 def run(machine):
     tape = {}
     cursor = 0
@@ -42,19 +44,22 @@ def run(machine):
     for i in range(machine.diag_steps):
         action = machine.states[state][tape.get(cursor, 0)]
         tape[cursor] = action.write_value
-        cursor = cursor - 1 if action.move_cursor == 'left' else cursor + 1
+        cursor = cursor - 1 if action.move_cursor == "left" else cursor + 1
         state = action.next_state
     return tape
+
 
 def part1(input):
     tape = run(input)
     return sum(tape.values())
 
+
 def main():
-    with open('../input/day_25.txt', 'r') as f:
+    with open("../input/day_25.txt", "r") as f:
         input = parse_input(f.read())
 
     print("part1:", part1(input))
+
 
 if __name__ == "__main__":
     main()
@@ -84,6 +89,7 @@ In state B:
     - Move one slot to the right.
     - Continue with state A.
 """
+
 
 def test_part1():
     assert part1(parse_input(EXAMPLE_DATA_1)) == 3

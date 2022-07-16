@@ -79,16 +79,16 @@ class Stream(object):
 
 
 def parse_group(stream):
-    if not stream.accept('{'):
+    if not stream.accept("{"):
         raise ValueError("group must start with '{'")
 
     res = []
-    while not stream.accept('}'):
+    while not stream.accept("}"):
         if stream.peek() is None:
-            raise ValueError('unterminated group')
+            raise ValueError("unterminated group")
         res.append(parse_element(stream))
-        if not stream.accept(','):
-            if not stream.accept('}'):
+        if not stream.accept(","):
+            if not stream.accept("}"):
                 raise ValueError("expected end of group '}'")
             break
 
@@ -96,51 +96,51 @@ def parse_group(stream):
 
 
 def parse_element(stream):
-    if stream.peek() == '{':
+    if stream.peek() == "{":
         return parse_group(stream)
-    elif stream.accept('<'):
+    elif stream.accept("<"):
         return parse_garbage(stream)
     else:
         return parse_string(stream)
 
 
 def parse_string(stream):
-    res = ''
-    while stream.peek() not in [None, ',', '{', '}']:
+    res = ""
+    while stream.peek() not in [None, ",", "{", "}"]:
         res += stream.next()
     return res
 
 
 def parse_garbage(stream):
-    res = '<'
-    while not stream.accept('>'):
+    res = "<"
+    while not stream.accept(">"):
         if stream.peek() is None:
             raise ValueError("expected '>'")
-        elif stream.accept('!'):
-            res += '!' + stream.next()
+        elif stream.accept("!"):
+            res += "!" + stream.next()
         else:
             res += stream.next()
 
-    return res + '>'
+    return res + ">"
 
 
 def parse(input):
     stream = Stream(input)
     result = parse_group(stream)
     if not stream.peek() is None:
-        raise ValueError('not at end of stream')
+        raise ValueError("not at end of stream")
     return result
 
 
 def score(group, depth=1):
-    return depth + sum([score(sub, depth+1) for sub in group if type(sub) is list])
+    return depth + sum([score(sub, depth + 1) for sub in group if type(sub) is list])
 
 
 def main():
-    with open('../input/day9_1.input.txt') as f:
+    with open("../input/day9_1.input.txt") as f:
         group = parse(f.read())
         print(score(group))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

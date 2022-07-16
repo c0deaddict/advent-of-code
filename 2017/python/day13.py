@@ -310,7 +310,7 @@ def traverse(layers):
     scanners = {k: 0 for k, _ in layers.items()}
 
     cost = None
-    for pos in range(0, max_layer+1):
+    for pos in range(0, max_layer + 1):
         new_cost = move_into(layers, scanners, pos)
         if new_cost is not None:
             if cost is None:
@@ -342,12 +342,12 @@ def go_undetected(layers):
 
 
 def main():
-    with open('../input/day13.input.txt') as f:
-        pairs = [line.strip().split(': ', 1) for line in f.readlines()]
+    with open("../input/day13.input.txt") as f:
+        pairs = [line.strip().split(": ", 1) for line in f.readlines()]
         layers = {int(k): int(v) for k, v in pairs}
         print(traverse(layers))
         print(go_undetected(layers))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
