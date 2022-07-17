@@ -1,8 +1,9 @@
 import pytest
 from collections import namedtuple
 from enum import Enum
-from queue import PriorityQueue
-import functools
+from functools import partial, reduce
+
+from astar import astar
 
 Position = namedtuple("Position", ["x", "y"])
 
@@ -64,6 +65,8 @@ def part1(cave):
         for y in range(0, cave.target.y + 1)
     )
 
+def manhattan(a, b):
+    return abs(a.x - b.x) + abs(a.y - b.y)
 
 def adjacent_positions(pos):
     yield Position(pos.x + 1, pos.y)
@@ -85,67 +88,22 @@ def adjacent(cave, node):
         if cave.region_type(next_pos).can_use(tool):
             yield 1, (next_pos, tool)
 
-
-def manhattan(a, b):
-    return abs(a.x - b.x) + abs(a.y - b.y)
-
-
-# https://bugs.python.org/issue31145
-@functools.total_ordering
-class Prio:
-    def __init__(self, f, node):
-        self.f = f
-        self.node = node
-
-    def __eq__(self, other):
-        return self.f == other.f
-
-    def __lt__(self, other):
-        return self.f < other.f
-
-
-def reconstruct_path(came_from, current):
+def path_cost(path):
     time = 0
-    path = [current]
-    _, prev_tool = current
-    while current in came_from:
-        current = came_from[current]
-        path.append(current)
-        _, tool = current
-        if tool != prev_tool:
+    for i in range(len(path)-1):
+        if path[i+1][1] != path[i][1]:
             time += 7
-            prev_tool = tool
         else:
             time += 1
-    path.reverse()
     return time
 
 
 def part2(cave):
     start = (Position(0, 0), Tool.TORCH)
-    open_queue = PriorityQueue()
-    open_queue.put(Prio(0, start))
-    open_set = set([start])
-    came_from = dict()
-    g_score = {start: 0}
-
-    while not open_queue.empty():
-        current = open_queue.get()
-        open_set.remove(current.node)
-
-        if current.node == (cave.target, Tool.TORCH):
-            return reconstruct_path(came_from, current.node)
-
-        for time, child in adjacent(cave, current.node):
-            g = g_score[current.node] + time
-            if child not in g_score or g < g_score[child]:
-                came_from[child] = current.node
-                g_score[child] = g
-                f = g + manhattan(child[0], cave.target)
-                if child not in open_set:
-                    open_set.add(child)
-                    open_queue.put(Prio(f, child))
-
+    target = (cave.target, Tool.TORCH)
+    h = lambda node: manhattan(node[0], cave.target)
+    path = astar(start, partial(adjacent, cave), h, target)
+    return path_cost(path)
 
 def main():
     input = Cave(3198, Position(12, 757))
