@@ -1,6 +1,6 @@
 # AoC 2019
 
-https://adventofcode.com/
+https://adventofcode.com/2019
 
 Used [this repository template](https://github.com/mhanberg/advent-of-code-elixir-starter)
 
