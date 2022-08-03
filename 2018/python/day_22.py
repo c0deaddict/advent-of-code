@@ -65,8 +65,10 @@ def part1(cave):
         for y in range(0, cave.target.y + 1)
     )
 
+
 def manhattan(a, b):
     return abs(a.x - b.x) + abs(a.y - b.y)
+
 
 def adjacent_positions(pos):
     yield Position(pos.x + 1, pos.y)
@@ -88,10 +90,11 @@ def adjacent(cave, node):
         if cave.region_type(next_pos).can_use(tool):
             yield 1, (next_pos, tool)
 
+
 def path_cost(path):
     time = 0
-    for i in range(len(path)-1):
-        if path[i+1][1] != path[i][1]:
+    for i in range(len(path) - 1):
+        if path[i + 1][1] != path[i][1]:
             time += 7
         else:
             time += 1
@@ -104,6 +107,7 @@ def part2(cave):
     h = lambda node: manhattan(node[0], cave.target)
     path = astar(start, partial(adjacent, cave), h, target)
     return path_cost(path)
+
 
 def main():
     input = Cave(3198, Position(12, 757))
