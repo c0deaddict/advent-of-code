@@ -137,8 +137,10 @@ def round(input):
             total_units_killed += units_killed
     return total_units_killed
 
+
 def sum_units(system):
     return sum(map(attrgetter("units"), system))
+
 
 def game_over(input):
     return any((sum_units(s) == 0 for s in input))
