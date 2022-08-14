@@ -25,7 +25,7 @@ def reconstruct_path(came_from, current):
 
 
 # https://en.wikipedia.org/wiki/A*_search_algorithm
-def astar(start, adjacent, h, target):
+def astar(start, adjacent, h, is_target):
     open_queue = PriorityQueue()
     open_queue.put(Prio(0, start))
     open_set = set([start])
@@ -36,7 +36,7 @@ def astar(start, adjacent, h, target):
         current = open_queue.get()
         open_set.remove(current.node)
 
-        if current.node == target:
+        if is_target(current.node):
             return reconstruct_path(came_from, current.node)
 
         for time, child in adjacent(current.node):
