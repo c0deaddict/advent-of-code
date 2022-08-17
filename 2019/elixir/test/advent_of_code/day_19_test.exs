@@ -5,7 +5,7 @@ defmodule AdventOfCode.Day19Test do
   alias AdventOfCode.Day05, as: IntCode
 
   test "scan_stream" do
-    input = File.read!("./input/day_19.txt")
+    input = File.read!("../input/day_19.txt")
 
     result =
       input

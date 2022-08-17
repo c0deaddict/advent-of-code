@@ -11,7 +11,7 @@ defmodule AdventOfCode.Day16Test do
       |> parse
       |> run(4)
 
-    assert result = parse("01029498")
+    assert result == parse("01029498")
   end
 
   test "part 1 test 2" do

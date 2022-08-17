@@ -5,7 +5,7 @@ defmodule Mix.Tasks.D13.P2 do
 
   @shortdoc "Day 13 Part 2"
   def run(args) do
-    input = File.read!("./input/day_13.txt")
+    input = File.read!("../input/day_13.txt")
 
     visual = Enum.member?(args, "-v")
 

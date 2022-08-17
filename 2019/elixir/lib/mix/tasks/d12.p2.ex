@@ -5,7 +5,7 @@ defmodule Mix.Tasks.D12.P2 do
 
   @shortdoc "Day 12 Part 2"
   def run(args) do
-    input = File.read!("./input/day_12.txt")
+    input = File.read!("../input/day_12.txt")
 
     if Enum.member?(args, "-b"),
       do: Benchee.run(%{part_2: fn -> input |> part2() end}),

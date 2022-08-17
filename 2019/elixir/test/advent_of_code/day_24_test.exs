@@ -16,11 +16,16 @@ defmodule AdventOfCode.Day24Test do
     assert result == 2129920
   end
 
-  @tag :skip
   test "part2" do
-    input = nil
-    result = part2(input)
+    input = """
+      ....#
+      #..#.
+      #..##
+      ..#..
+      #....
+    """
+    result = part2_n(input, 10)
 
-    assert result
+    assert result == 99
   end
 end
