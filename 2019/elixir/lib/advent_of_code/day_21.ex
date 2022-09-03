@@ -46,7 +46,7 @@ defmodule AdventOfCode.Day21 do
   end
 
   def part1(input) do
-    # !(A AND B AND C) AND D
+    # !(A AND B AND C) AND D AND (E OR (!E AND H))
     springscript = [
       {:or, "A", "T"},
       {:and, "B", "T"},
@@ -103,61 +103,25 @@ defmodule AdventOfCode.Day21 do
     end
   end
 
-  def reach?([false, _, _, false | _]), do: false
-  def reach?([false, _, _, true | tiles]), do: reach?(tiles)
-
-  def reach?([true | no_jump] = [_, _, _, d | jump]) do
-    reach?(no_jump) || (d === true && reach?(jump))
-  end
-
-  def reach?([false | _]), do: true
-  def reach?([true | _]), do: true
-  def reach?([]), do: true
-
-  def should_jump?(tiles = [false | _]), do: reach?(tiles) || nil
-  def should_jump?([_ | rest] = [true, _, _, true | _]), do: not reach?(rest ++ [false])
-  def should_jump?(_), do: false
-
-  def all_regs(lookahead) do
-    ["T", "J"] ++ for i <- 0..(lookahead - 1), do: chr(hd('A') + i)
-  end
-
-  def ops_combinations(lookahead) do
-    for op <- [:and, :or, :not],
-        x <- all_regs(lookahead),
-        y <- ["T", "J"] do
-      {op, x, y}
-    end
-  end
-
   def part2(input) do
-    # input
-    # |> IntCode.parse()
-    # |> spawn_program(self())
-    # |> instruct_springdroid("RUN", springscript)
-    # |> print_output()
+    # !(A AND B AND C) AND D AND (E OR (!E AND H))
+    springscript = [
+      {:or, "A", "T"},
+      {:and, "B", "T"},
+      {:and, "C", "T"},
+      {:not, "T", "T"},
+      {:and, "D", "T"},
+      {:or, "T", "J"},
+      {:not, "E", "T"},
+      {:and, "H", "T"},
+      {:or, "E", "T"},
+      {:and, "T", "J"}
+    ]
 
-    # https://www.mathematik.uni-marburg.de/~thormae/lectures/ti1/code/qmc/
-    # https://en.wikipedia.org/wiki/Quine%E2%80%93McCluskey_algorithm
-
-    truth_table =
-      combinations([false, true], 9)
-      |> Enum.map(fn tiles -> {tiles, should_jump?(tiles)} end)
-      |> Enum.map(fn {tiles, jump} ->
-        {Enum.map(tiles, fn
-           false -> "0"
-           true -> "1"
-         end),
-         case jump do
-           nil -> "nil"
-           false -> "0"
-           true -> "1"
-         end}
-      end)
-      |> Enum.map(fn {tiles, jump} ->
-        Enum.join(tiles, ",") <> "," <> jump
-      end)
-      |> Enum.join("\n")
-      |> IO.puts()
+    input
+    |> IntCode.parse()
+    |> spawn_program(self())
+    |> instruct_springdroid("RUN", format_script(springscript))
+    |> print_output()
   end
 end
