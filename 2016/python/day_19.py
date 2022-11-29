@@ -19,29 +19,13 @@ def part1(input):
 
 
 def part2(input):
-    elves = [1] * input
-    count = input
-    next = {i: (i + 1) % input for i in range(input)}
-    across = {i: (i + input // 2) % input for i in range(input)}
-    i = 0
-    while True:
-        # j = i
-        # for _ in range(count // 2):
-        #     prev = j
-        #     j = next[j]
-        j = across[i]
-
-        print(f"Elf {i+1} steales Elf {j+1}'s presents")
-        elves[i] += elves[j]
-        elves[j] = 0
-
-        # next[prev] = next[j]
-
-        count -= 1
-        if count == 1:
-            return i + 1
-
-        i = next[i]
+    for i in range(input):
+        if 3**i > input - 1:
+            start = 3 ** (i - 1)
+            if input <= start * 2:
+                return input - start
+            else:
+                return start + (input - start * 2) * 2
 
 
 def main():
