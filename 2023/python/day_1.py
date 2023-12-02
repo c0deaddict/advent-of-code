@@ -1,5 +1,5 @@
 def parse_input(input):
-    return input
+    return input.strip().splitlines()
 
 
 def first_and_last(digits):
@@ -7,10 +7,7 @@ def first_and_last(digits):
 
 
 def part1(input):
-    return sum(
-        first_and_last([int(c) for c in line if c.isdigit()])
-        for line in input.strip().splitlines()
-    )
+    return sum(first_and_last([int(c) for c in line if c.isdigit()]) for line in input)
 
 
 digit_strings = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -34,7 +31,7 @@ def first_and_last_part2(line):
 
 
 def part2(input):
-    return sum(first_and_last_part2(line) for line in input.strip().splitlines())
+    return sum(first_and_last_part2(line) for line in input)
 
 
 def main():
