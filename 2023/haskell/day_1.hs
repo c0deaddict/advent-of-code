@@ -1,16 +1,25 @@
+{-# LANGUAGE QuasiQuotes #-}
+import Text.RawString.QQ
+import Test.HUnit
+
 import Data.Char
 import Data.List
 
 main = do
-  input <- readFile "../input/day_1.txt"
+  input <- fmap parseInput (readFile "../input/day_1.txt")
+  runTestTT tests
   print . part1 $ input
   print . part2 $ input
 
+trim = dropWhileEnd isSpace . dropWhile isSpace
+parseInput input = lines (trim input)
+
 firstAndLast digits = 10 * head digits + last digits
 
-part1 :: String -> Int
-part1 input = sum (map (firstAndLast . map digitToInt . filter isDigit) (lines input))
+part1 :: [String] -> Int
+part1 input = sum (map (firstAndLast . map digitToInt . filter isDigit) input)
 
+digitStrings :: [String]
 digitStrings = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
 findDigitString line =
   let
@@ -26,5 +35,28 @@ parseDigits line@(x:xs)
   | Just d <- findDigitString line = d : parseDigits xs
   | otherwise = parseDigits xs
 
-part2 :: String -> Int
-part2 input = sum (map (firstAndLast . parseDigits) (lines input))
+part2 :: [String] -> Int
+part2 input = sum (map (firstAndLast . parseDigits) input)
+
+example1 = [r|
+1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet
+|]
+
+part1_test = TestCase (assertEqual "example1" (part1 (parseInput example1)) 142)
+
+example2 = [r|
+two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+|]
+
+part2_test = TestCase (assertEqual "example2" (part2 (parseInput example2)) 281)
+
+tests = TestList [TestLabel "part1" part1_test, TestLabel "part2" part2_test]
