@@ -1,5 +1,6 @@
 from itertools import groupby
-from functools import cmp_to_key
+from functools import cmp_to_key, partial
+from enum import IntEnum
 
 
 def parse_input(input):
@@ -10,44 +11,66 @@ def groups(hand):
     return [l for _, g in groupby(sorted(hand)) if (l := len(list(g))) != 1]
 
 
-def hand_score(hand):
-    match groups(hand):
-        case [5]:
-            return 6
-        case [4]:
-            return 5
-        case [2, 3] | [3, 2]:
-            return 4
-        case [3]:
-            return 3
-        case [2, 2]:
-            return 2
-        case [2]:
-            return 1
-        case _:
-            return 0
+class HandScore(IntEnum):
+    FIVE_OF_A_KIND = 6
+    FOUR_OF_A_KIND = 5
+    FULL_HOUSE = 4
+    THREE_OF_A_KIND = 3
+    TWO_PAIR = 2
+    PAIR = 1
+    HIGH_CARD = 0
+
+    @classmethod
+    def score(cls, hand):
+        match groups(hand):
+            case [5]:
+                return cls.FIVE_OF_A_KIND
+            case [4]:
+                return cls.FOUR_OF_A_KIND
+            case [2, 3] | [3, 2]:
+                return cls.FULL_HOUSE
+            case [3]:
+                return cls.THREE_OF_A_KIND
+            case [2, 2]:
+                return cls.TWO_PAIR
+            case [2]:
+                return cls.PAIR
+            case _:
+                return cls.HIGH_CARD
+
+    def add_joker(self):
+        match self:
+            case HandScore.FOUR_OF_A_KIND:
+                return HandScore.FIVE_OF_A_KIND
+            case HandScore.THREE_OF_A_KIND:
+                return HandScore.FOUR_OF_A_KIND
+            case HandScore.TWO_PAIR:
+                return HandScore.FULL_HOUSE
+            case HandScore.PAIR:
+                return HandScore.THREE_OF_A_KIND
+            case HandScore.HIGH_CARD:
+                return HandScore.PAIR
+            case _:
+                return self
 
 
-def card_score(card):
-    return "23456789TJQKA".index(card)
-
-
-def compare_high_card(a, b) -> int:
+def compare_strings(order, a, b) -> int:
     for ca, cb in zip(a, b):
-        if (i := card_score(ca)) != (j := card_score(cb)):
+        if (i := order.index(ca)) != (j := order.index(cb)):
             return i - j
     return 0
 
 
-def compare_hands(a, b) -> int:
+def compare_hands(hand_score, card_order, a, b) -> int:
     if (i := hand_score(a)) != (j := hand_score(b)):
         return i - j
     else:
-        return compare_high_card(a, b)
+        # Compare high card
+        return partial(compare_strings, card_order)(a, b)
 
 
-def compare_hand_bid(a, b) -> int:
-    return compare_hands(a[0], b[0])
+def compare_hand_bid(hand_score, card_order, a, b) -> int:
+    return compare_hands(hand_score, card_order, a[0], b[0])
 
 
 def score(input, cmp):
@@ -58,75 +81,18 @@ def score(input, cmp):
 
 
 def part1(input):
-    return score(input, compare_hand_bid)
-
-
-# ------------------------------------------------------------------------------
+    return score(input, partial(compare_hand_bid, HandScore.score, "23456789TJQKA"))
 
 
 def hand_score_part2(hand):
-    jokers = hand.count("J")
-    match (groups(c for c in hand if c != "J"), jokers):
-        case [5], _:
-            return 6
-        case [4], _:
-            return 5 + jokers
-        case ([2, 3] | [3, 2]), _:
-            return 4
-        case [3], 0:
-            return 3
-        case [3], 1:
-            return 5  # four of a kind
-        case [3], 2:
-            return 6  # five of a kind
-        case [2, 2], 0:
-            return 2
-        case [2, 2], 1:
-            return 4  # full house
-        case [2], 0:
-            return 1
-        case [2], 1:
-            return 3  # three of a kind
-        case [2], 2:
-            return 5  # four of a kind
-        case [2], 3:
-            return 6  # five of a kind
-        case _, 0:
-            return 0
-        case _, 1:
-            return 1  # pair
-        case _, 2:
-            return 3  # three of a kind
-        case _, 3:
-            return 5  # four of a kind
-        case _, _:
-            return 6  # five of a kind
-
-
-def card_score_part2(card):
-    return "J23456789TQKA".index(card)
-
-
-def compare_high_card_part2(a, b) -> int:
-    for ca, cb in zip(a, b):
-        if (i := card_score_part2(ca)) != (j := card_score_part2(cb)):
-            return i - j
-    return 0
-
-
-def compare_hands_part2(a, b) -> int:
-    if (i := hand_score_part2(a)) != (j := hand_score_part2(b)):
-        return i - j
-    else:
-        return compare_high_card_part2(a, b)
-
-
-def compare_hand_bid_part2(a, b) -> int:
-    return compare_hands_part2(a[0], b[0])
+    s = HandScore.score(c for c in hand if c != "J")
+    for _ in range(hand.count("J")):
+        s = s.add_joker()
+    return s
 
 
 def part2(input):
-    return score(input, compare_hand_bid_part2)
+    return score(input, partial(compare_hand_bid, hand_score_part2, "J23456789TQKA"))
 
 
 def main():
