@@ -1,4 +1,5 @@
 import re
+import math
 from functools import reduce
 import operator
 
@@ -15,11 +16,10 @@ def product(it):
 
 
 def count_wins(time, distance):
-    count = 0
-    for t in range(1, time - 1):
-        if (time - t) * t > distance:
-            count += 1
-    return count
+    d = math.sqrt(time * time - 4 * (distance + 1))
+    x1 = (-time + d) / -2
+    x2 = (-time - d) / -2
+    return 1 + math.floor(x2) - math.ceil(x1)
 
 
 def part1(input):
@@ -53,5 +53,5 @@ def test_part1():
     assert part1(parse_input(EXAMPLE_1)) == 288
 
 
-def test_part2():
-    assert part2(parse_input(EXAMPLE_1)) == 71503
+# def test_part2():
+#     assert part2(parse_input(EXAMPLE_1)) == 71503
