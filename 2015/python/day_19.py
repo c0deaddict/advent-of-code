@@ -32,9 +32,6 @@ def part1(input):
     return len(do_replacements(input.replacements, input.molecule))
 
 
-shortest = None
-
-
 def adjacent(replacements, node):
     return ((1, next) for next in do_replacements(replacements, node))
 

@@ -2,6 +2,8 @@ use clap::{App, Arg};
 use std::fmt::Debug;
 use std::time::Instant;
 
+pub mod astar;
+
 type ParseInput<'r, I> = fn(&'r str) -> I;
 type Part<I, T> = fn(&I) -> T;
 
