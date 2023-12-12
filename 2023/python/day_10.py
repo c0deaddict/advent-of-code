@@ -16,6 +16,17 @@ class Dir(Enum):
     def horz(self):
         return self in [Dir.EAST, Dir.WEST]
 
+    def turn(self):
+        match self:
+            case Dir.NORTH:
+                return Dir.EAST
+            case Dir.EAST:
+                return Dir.SOUTH
+            case Dir.SOUTH:
+                return Dir.WEST
+            case Dir.WEST:
+                return Dir.NORTH
+
     @staticmethod
     def get(a, b):
         return next(d for d in Dir if d.value == (b[0] - a[0], b[1] - a[1]))
@@ -79,101 +90,36 @@ def part1(input):
     return (len(find_loop(input)) + 1) // 2
 
 
-def print_map(g, loop, enclosed):
-    minx = min(x for x, _ in g.keys())
-    miny = min(y for _, y in g.keys())
-    maxx = max(x for x, _ in g.keys())
-    maxy = max(y for _, y in g.keys())
-    print()
-    for y in range(miny, maxy + 1):
-        line = ""
-        for x in range(minx, maxx + 1):
-            p = (x, y)
-            if p in enclosed:
-                line += "I"
-            elif p in loop:
-                line += g[p]
-            elif g[p] != ".":
-                line += "."
-            else:
-                line += "."
-        print(line)
-
-
-def fix_start(loop):
-    match Dir.get(loop[-1], loop[0]), Dir.get(loop[-1], loop[-2]):
-        case (Dir.SOUTH, Dir.EAST) | (Dir.EAST, Dir.SOUTH):
-            return "F"
-        case (Dir.SOUTH, Dir.WEST) | (Dir.WEST, Dir.SOUTH):
-            return "7"
-        case (Dir.NORTH, Dir.EAST) | (Dir.EAST, Dir.NORTH):
-            return "L"
-        case (Dir.NORTH, Dir.WEST) | (Dir.WEST, Dir.NORTH):
-            return "J"
-        case (Dir.SOUTH | Dir.NORTH), _:
-            return "|"
-        case _:
-            return "-"
-
-
-def trace(g, loop, v, d):
-    last_turn = None
+def scan(g, loop, v, d):
+    result = []
     while True:
         v = d.move(*v)
-        if v not in g:
-            return False  # edge
         if v in loop:
-            if g[v] == "|" and d.horz():
-                return True
-            elif g[v] == "-" and d.vert():
-                return True
-            elif g[v] not in ["|", "-"]:
-                match last_turn, g[v], d:
-                    case "F", "J", (Dir.EAST | Dir.SOUTH):
-                        return True
-                    case "J", "F", (Dir.WEST | Dir.NORTH):
-                        return True
-                    case "7", "L", (Dir.WEST | Dir.SOUTH):
-                        return True
-                    case "L", "7", (Dir.EAST | Dir.NORTH):
-                        return True
-                last_turn = g[v]
-
-
-def scan(g, loop, v):
-    wave = [v]
-    result = set()
-    while wave:
-        result.update(wave)
-        wave = set(
-            n
-            for v in wave
-            for d in Dir
-            if (n := d.move(*v)) in g and n not in loop and n not in result
-        )
-    return result
+            return result
+        if v not in g:
+            raise ValueError("not in loop")
+        result.append(v)
 
 
 def enclosed(g, loop):
-    visited = set()
     result = set()
-    for v in g:
-        if v not in loop and v not in visited:
-            area = scan(g, loop, v)
-            visited.update(area)
-            if all(all(trace(g, loop, v, d) for d in Dir) for v in area):
-                result.update(area)
+    prev = None
+    for a, b in zip(loop, loop[1:]):
+        d = Dir.get(a, b).turn()
+        # if turning: also cast normal in "open" part of the corner.
+        if prev and d != prev and Dir.get(a, b) != prev:
+            result.update(scan(g, loop, a, prev))
+        result.update(scan(g, loop, a, d))
+        prev = d
     return result
 
 
 def part2(input):
     loop = find_loop(input)
-    input[loop[-1]] = fix_start(loop)
-    print("fixed start", input[loop[-1]])
-    loop = set(loop)
-    e = enclosed(input, loop)
-    print_map(input, loop, e)
-    return len(e)
+    try:
+        return len(enclosed(input, loop))
+    except ValueError:
+        return len(enclosed(input, list(reversed(loop))))
 
 
 def main():
