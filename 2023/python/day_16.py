@@ -34,7 +34,7 @@ def energized(input, v, d):
             (nv, nd)
             for v, d in wave
             for nd in propagate(input[v.y][v.x], d)
-            if in_field(input, nv := v.add(nd.value)) and (nv, nd) not in visited
+            if in_field(input, nv := v + nd.value) and (nv, nd) not in visited
         )
     return len(set(v for v, _ in visited))
 

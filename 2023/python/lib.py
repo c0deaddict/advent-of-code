@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+from astar import astar
 
 
 @dataclass(frozen=True)
@@ -7,8 +8,11 @@ class Vector:
     x: int
     y: int
 
-    def add(self, o: "Vector") -> "Vector":
+    def __add__(self, o: "Vector") -> "Vector":
         return Vector(self.x + o.x, self.y + o.y)
+
+    def manhattan(self, o: "Vector") -> int:
+        return abs(self.x - o.x) + abs(self.y - o.y)
 
 
 class Direction(Enum):
