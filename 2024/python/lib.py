@@ -4,6 +4,10 @@ from astar import astar
 from typing import Callable
 
 
+def split_ints(line, sep):
+    return list(map(int, line.split(sep)))
+
+
 def sign(i):
     if i == 0:
         return 0
