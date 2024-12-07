@@ -4,10 +4,6 @@ from astar import astar
 from typing import Callable
 
 
-def split_ints(line, sep):
-    return list(map(int, line.split(sep)))
-
-
 def sign(i):
     if i == 0:
         return 0
@@ -114,3 +110,7 @@ def enclosed(path: list[Vector], outside: Callable[[Vector], bool]) -> set[Vecto
         return try_enclosed(Direction.turn_left)
     except ValueError:
         return try_enclosed(Direction.turn_right)
+
+
+def split_ints(line, sep):
+    return list(map(int, line.split(sep)))
