@@ -2,6 +2,7 @@ from enum import Enum
 from dataclasses import dataclass
 from astar import astar
 from typing import Callable
+import math
 
 
 def sign(i):
@@ -24,8 +25,21 @@ class Vector:
     def __sub__(self, o: "Vector") -> "Vector":
         return Vector(self.x - o.x, self.y - o.y)
 
+    def __mul__(self, o: "Vector") -> "Vector":
+        return Vector(self.x * o.x, self.y * o.y)
+
     def scale(self, c: int) -> "Vector":
         return Vector(self.x * c, self.y * c)
+
+    def scale_gcd(self) -> "Vector":
+        d = math.gcd(self.x, self.y)
+        if d == 0:
+            return self
+        else:
+            return Vector(self.x // d, self.y // d)
+
+    def invert(self) -> "Vector":
+        return Vector(-self.x, -self.y)
 
     def sign(self) -> "Vector":
         return Vector(sign(self.x), sign(self.y))
