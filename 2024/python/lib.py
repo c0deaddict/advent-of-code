@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from astar import astar
 from typing import Callable
 import math
+from typing import Any
 
 
 def sign(i):
@@ -54,6 +55,15 @@ class Vector:
             Vector(self.x, self.y - 1),
             Vector(self.x, self.y + 1),
         ]
+
+    def in_area(self, map: list[list[Any]]) -> bool:
+        return 0 <= self.x < len(map[0]) and 0 <= self.y < len(map)
+
+    def get(self, map: list[list[Any]]) -> Any | None:
+        if self.in_area(map):
+            return map[self.y][self.x]
+        else:
+            return None
 
 
 class Direction(Enum):
