@@ -29,6 +29,9 @@ class Vector:
     def __mul__(self, o: "Vector") -> "Vector":
         return Vector(self.x * o.x, self.y * o.y)
 
+    def __floordiv__(self, o: "Vector") -> "Vector":
+        return Vector(self.x // o.x, self.y // o.y)
+
     def scale(self, c: int) -> "Vector":
         return Vector(self.x * c, self.y * c)
 
@@ -55,6 +58,20 @@ class Vector:
             Vector(self.x, self.y - 1),
             Vector(self.x, self.y + 1),
         ]
+
+    def diagonal_neighbors(self):
+        return [
+            Vector(self.x - 1, self.y - 1),
+            Vector(self.x - 1, self.y + 1),
+            Vector(self.x + 1, self.y - 1),
+            Vector(self.x + 1, self.y + 1),
+        ]
+
+    def all_neighbors(self):
+        return self.neighbors() + self.diagonal_neighbors()
+
+    def modulo(self, o: "Vector") -> "Vector":
+        return Vector(self.x % o.x, self.y % o.y)
 
     def in_area(self, map: list[list[Any]]) -> bool:
         return 0 <= self.x < len(map[0]) and 0 <= self.y < len(map)
