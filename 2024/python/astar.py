@@ -37,7 +37,7 @@ def astar(start, adjacent, h, is_target):
         open_set.remove(current.node)
 
         if is_target(current.node):
-            return reconstruct_path(came_from, current.node)
+            return current.f, reconstruct_path(came_from, current.node)
 
         for time, child in adjacent(current.node):
             g = g_score[current.node] + time
