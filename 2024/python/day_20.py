@@ -16,20 +16,6 @@ def parse_input(input):
     return input.strip().splitlines()
 
 
-def adjacent(input, node):
-    return [
-        (1, n) for n in node.neighbors() if n.in_area(input) and n.get(input) != "#"
-    ]
-
-
-def adjacent_cheat(input, walls, node):
-    return [
-        (1, n)
-        for n in node.neighbors()
-        if n.in_area(input) and (n in walls or n.get(input) != "#")
-    ]
-
-
 def distance_map(input, p):
     dist = {p: 0}
     wave = [p]
@@ -56,23 +42,18 @@ def find_path_in_distance_map(dist, start, finish):
     return path
 
 
-def try_cheats(input, dist, p, n):
-    for i in n.neighbors():
-        if i in dist and p != i and dist[p] - dist[i] > 2:
-            yield (p, i), dist[p] - dist[i] - 2
-
-
 def find_cheats(input, ps):
     start = find_tile(input, "S")
     finish = find_tile(input, "E")
     dist = distance_map(input, finish)
     path = find_path_in_distance_map(dist, start, finish)
 
-    cheats = {}
-    for p in path:
-        for n in p.neighbors():
-            if n.get(input) == "#":
-                cheats.update(try_cheats(input, dist, p, n))
+    cheats = {
+        (p, i): dist[p] - di - d
+        for p in path
+        for i, di in dist.items()
+        if (d := i.manhattan(p)) <= ps and dist[p] - di > d
+    }
 
     return cheats.values()
 
@@ -135,7 +116,7 @@ def test_part1():
 
 def test_part2():
     cheats = find_cheats(parse_input(EXAMPLE_1), 20)
-    assert Counter(c for c in cheats if c > 50) == {
+    assert Counter(c for c in cheats if c >= 50) == {
         50: 32,
         52: 31,
         54: 29,
