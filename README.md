@@ -12,5 +12,6 @@ This repository contains my solutions to the Advent of Code challenges.
 | 2020 |                    | :heavy_check_mark: |                    |                    |                    |                    | 50      |
 | 2021 | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    |                    | 50      |
 | 2022 | :heavy_check_mark: |                    |                    |                    |                    |                    | 36      |
-| 2023 | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | 35      |
-| 2024 | :heavy_check_mark: |                    |                    |                    |                    | :heavy_check_mark: | 2       |
+| 2023 | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | 41      |
+| 2024 | :heavy_check_mark: |                    |                    |                    |                    | :heavy_check_mark: | 45      |
+| 2025 | :heavy_check_mark: |                    |                    |                    |                    |                    | 16      |
