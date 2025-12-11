@@ -10,30 +10,7 @@ def parse_input(input):
     return dict(parse_line(line) for line in input.strip().splitlines())
 
 
-def all_paths(input, start, target):
-    queue = [start]
-    while queue:
-        v = queue.pop()
-        if v == target:
-            yield 1
-        for n in input.get(v, []):
-            queue.append(n)
-
-
-def part1(input):
-    return sum(1 for _ in all_paths(input, "you", "out"))
-
-
-def invert_graph(input):
-    result = defaultdict(list)
-    for v, outputs in input.items():
-        for n in outputs:
-            result[n].append(v)
-    return result
-
-
 def count_paths(input, start, target):
-    # g = invert_graph(input)
     count = dict()
 
     queue = [start]
@@ -44,23 +21,30 @@ def count_paths(input, start, target):
             continue
 
         computed = True
-        for n in input[v]:
+        for n in input.get(v, []):
             if n not in count:
                 if n not in queue:
                     queue.append(n)
                 computed = False
 
         if computed:
-            count[v] = sum(count[n] for n in input[v])
+            count[v] = sum(count[n] for n in input.get(v, []))
         else:
             queue.append(v)
 
-    print(count)
     return count[start]
 
-def part2(input):
-    return count_paths(input, "svr", "out")
 
+def part1(input):
+    return count_paths(input, "you", "out")
+
+
+def part2(input):
+    return (
+        count_paths(input, "svr", "fft")
+        * count_paths(input, "fft", "dac")
+        * count_paths(input, "dac", "out")
+    )
 
 
 def main():
