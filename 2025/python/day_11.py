@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-
 def parse_line(line):
     parts = line.split(":", 2)
     return parts[0], parts[1].strip().split()
